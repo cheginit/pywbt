@@ -36,7 +36,7 @@ jobs:
         cache: true
         cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
     - name: Run pixi
-      run: pixi r test
+      run: pixi r -e ${{ matrix.environment }} test
 
     - name: Run codecov and upload the report
       uses: codecov/codecov-action@v4
