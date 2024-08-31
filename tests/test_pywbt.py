@@ -8,7 +8,7 @@ import rasterio
 from pywbt import whitebox_tools
 
 
-def test_whitebox_tools():
+def test_whitebox_tools(wbt_zipfile: str) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         shutil.copy("tests/dem.tif", temp_dir)
         wbt_args = {
@@ -21,7 +21,10 @@ def test_whitebox_tools():
             "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=streams.tif"],
         }
         whitebox_tools(
-            wbt_args, wbt_root=f"{temp_dir}/wbt", work_dir=temp_dir, zip_path="tests/wbt_240.zip"
+            wbt_args,
+            wbt_root=f"{temp_dir}/wbt",
+            work_dir=temp_dir,
+            zip_path=f"tests/wbt_zip/{wbt_zipfile}",
         )
         with rasterio.open(f"{temp_dir}/streams.tif") as src:
             assert src.width == 233

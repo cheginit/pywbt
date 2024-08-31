@@ -14,10 +14,14 @@ import urllib.request
 import zipfile
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING, Literal
 
 BASE_URL = "https://www.whiteboxgeo.com/WBT_{}/WhiteboxTools_{}.zip"
 
 __all__ = ["whitebox_tools"]
+
+if TYPE_CHECKING:
+    Platform = Literal["win_amd64", "darwin_m_series", "darwin_amd64", "linux_amd64", "linux_musl"]
 
 
 def _setup_logger() -> logging.Logger:
@@ -35,7 +39,7 @@ logger = _setup_logger()
 
 
 @lru_cache(maxsize=1)
-def _get_platform_suffix() -> str:
+def _get_platform_suffix() -> Platform:
     """Determine the platform suffix for downloading WhiteboxTools."""
     system = platform.system()
     if system not in ("Windows", "Darwin", "Linux"):
