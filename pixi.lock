@@ -623,7 +623,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/vs2015_runtime-14.40.33810-h3bf8584_20.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/xz-5.2.6-h8d14728_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/yaml-0.2.5-h8ffe710_2.tar.bz2
-  test12:
+  test312:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     indexes:
@@ -4342,9 +4342,9 @@ packages:
   sha256: 328171f4e3623139da4983451950b28e95ac706e13f3f2630a879749e7a8b319
 - kind: pypi
   name: pywbt
-  version: 0.1.dev1+g892c6f8.d20240831
+  version: 0.1.dev4+g1f0d6d0
   path: .
-  sha256: 16934efda87844cde9a6867f5959294cf52cdf7068811bea1e17fdc52125fb8c
+  sha256: d481d74a5c5249590d8cb6a1b1c686c6a6351892cdd71a0cb8769d568bdba6b1
   requires_dist:
   - folium ; extra == 'dev'
   - geopandas>=1 ; extra == 'dev'
