@@ -1,6 +1,14 @@
+"""Hooks for the documentation."""
+
+from __future__ import annotations
+
 from pathlib import Path
+from typing import TYPE_CHECKING
+
 from mkdocs.structure.files import File, Files
-from mkdocs.config.defaults import MkDocsConfig
+
+if TYPE_CHECKING:
+    from mkdocs.config.defaults import MkDocsConfig
 
 changelog = Path(__file__).parent.parent / "CHANGELOG.md"
 
@@ -11,7 +19,7 @@ def on_files(files: Files, config: MkDocsConfig):
         File(
             path=changelog.name,
             src_dir=changelog.parent,
-            dest_dir=f"{config.site_dir}",
+            dest_dir=str(config.site_dir),
             use_directory_urls=config.use_directory_urls,
         )
     )
