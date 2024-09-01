@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
 import platform
+
+import pytest
 
 
 @pytest.fixture(autouse=True)
@@ -19,7 +20,6 @@ def wbt_zipfile() -> str:
     """Determine the platform suffix for downloading WhiteboxTools."""
     system = platform.system()
     base_name = "WhiteboxTools_{}.zip"
-    base_name.format
     if system not in ("Windows", "Darwin", "Linux"):
         raise ValueError(f"Unsupported operating system: {system}")
 
