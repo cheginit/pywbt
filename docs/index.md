@@ -1,7 +1,7 @@
 # PyWBT: WhiteboxTools Wrapper for Python
 
 [![PyPI](https://img.shields.io/pypi/v/pywbt)](https://pypi.org/project/pywbt/)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)
+[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)[![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/en/latest/?badge=latest)
 
 ## Features
 
@@ -44,7 +44,7 @@ wbt_args = {
 whitebox_tools(wbt_args)
 ```
 
-![straher](https://raw.githubusercontent.com/cheginit/pywbt/main/notebooks/stream_order.png)
+![straher](https://raw.githubusercontent.com/cheginit/pywbt/main/docs/examples/stream_order.png)
 
 For more information on how to different WhiteboxTools tools and their
 arguments, please visit its
