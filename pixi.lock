@@ -5437,9 +5437,9 @@ packages:
   sha256: 328171f4e3623139da4983451950b28e95ac706e13f3f2630a879749e7a8b319
 - kind: pypi
   name: pywbt
-  version: 0.1.dev13+g4da478a.d20240901
+  version: 0.1.dev29+ge8890eb.d20240901
   path: .
-  sha256: 8b712bfe38f1d76e3ff4802f3e52b147c6033f013dbe56e7caddbe66bf7392e2
+  sha256: f7a5b32445211989f7de344c2cb9cb2d57d4e9046ff701465bbbf845ea6e555a
   requires_dist:
   - folium ; extra == 'dev'
   - geopandas>=1 ; extra == 'dev'

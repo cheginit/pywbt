@@ -8,7 +8,7 @@ requires = [
 
 [project]
 name = "pywbt"
-description = "A wrapper for WhiteboxTools command-line interface"
+description = "A lightweight Python wrapper for WhiteboxTools command-line interface"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
