@@ -7,10 +7,10 @@ build:
 
 python:
   install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
+  - method: pip
+    path: .
+    extra_requirements:
+    - docs
 
 mkdocs:
   configuration: mkdocs.yml
