@@ -195,14 +195,12 @@ def whitebox_tools(
     arg_dict : dict
         A dictionary containing the tool names as keys and list of each
         tool's arguments as values. For example:
-
-        .. code-block:: python
-
-            {
-                "BreachDepressionsLeastCost": ["--dem='dem.tif'", "--output='breached_dem.tif'"],
-                "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
-            }
-
+        ``` py
+        {
+            "BreachDepressionsLeastCost": ["--dem='dem.tif'", "--output='breached_dem.tif'"],
+            "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
+        }
+        ```
     wbt_root : str or Path, optional
         Path to the root directory containing the Whitebox executables (default is "WBT").
     work_dir : str or Path, optional
@@ -229,11 +227,6 @@ def whitebox_tools(
         If the tool execution fails.
     Exception
         For any other unexpected errors.
-
-    Notes
-    -----
-    This function will run the specified WhiteboxTools tool and handle its output.
-    If verbose is True, all output will be printed.
     """
     logger.setLevel(logging.INFO if verbose else logging.WARNING)
 
