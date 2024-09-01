@@ -35,7 +35,7 @@ def get_nasadem(
     bbox_buff = bbox_utm = bbox
     utm = 4326
     if to_utm:
-        gdf = gpd.GeoSeries(shapely.box(*bbox), crs=4326)
+        gdf = gpd.GeoSeries(shapely.box(*bbox), crs=4326)  # pyright: ignore[reportCallIssue]
         utm = gdf.estimate_utm_crs()
         bbox_utm = gdf.to_crs(utm).total_bounds
         buff_size, dem_res = 20, 30
@@ -49,7 +49,7 @@ def get_nasadem(
         for item in catalog.search(collections=["nasadem"], bbox=bbox_buff).items()
     )
     dem = rxr_merge.merge_arrays(
-        [rioxarray.open_rasterio(href).squeeze(drop=True) for href in signed_asset]
+        [rioxarray.open_rasterio(href).squeeze(drop=True) for href in signed_asset]  # pyright: ignore[reportArgumentType]
     )
     if to_utm:
         dem = dem.rio.reproject(utm).fillna(dem.rio.nodata)
