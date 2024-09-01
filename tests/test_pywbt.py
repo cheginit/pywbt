@@ -20,6 +20,9 @@ def test_whitebox_tools(wbt_zipfile: str) -> None:
             "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
             "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=streams.tif"],
         }
+        # To avoid redownloading and hitting the WBT server multiple times for testing
+        # on different platforms and Python versions, especially on CI, the binareis are
+        # stored in `tests/wbt_zip` directory.
         whitebox_tools(
             wbt_args,
             wbt_root=f"{temp_dir}/wbt",
