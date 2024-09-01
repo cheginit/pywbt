@@ -51,6 +51,9 @@ theme:
   - navigation.sections
   - navigation.top
   - navigation.footer
+  - navigation.indexes
+  - search.suggest
+  - search.highlight
 
 repo_url: https://github.com/cheginit/pywbt/
 edit_uri: edit/main/docs/
