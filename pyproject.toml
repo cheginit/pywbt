@@ -80,6 +80,11 @@ packages = [
   "src/pywbt",
 ]
 
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "*.zip",
+]
+
 [tool.ruff]
 target-version = "py38"
 line-length = 100
