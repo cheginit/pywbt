@@ -5,8 +5,8 @@
 
 ## Features
 
-PyWBT is a Python wrapper for the command-line interface of
-[WhiteboxTools](https://www.whiteboxgeo.com/) (WBT),
+PyWBT is a lightweight Python wrapper (only using Python's built-in modules) for
+the command-line interface of [WhiteboxTools](https://www.whiteboxgeo.com/) (WBT),
 a powerful Rust library for geospatial analysis. It is designed to simplify the use of WhiteboxTools by providing a Pythonic interface, allowing users to easily
 run tools and create custom workflows.
 
