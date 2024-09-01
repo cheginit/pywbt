@@ -55,8 +55,10 @@ with tempfile.TemporaryDirectory(dir=".") as work_dir:
 
 ![straher](https://raw.githubusercontent.com/cheginit/pywbt/main/docs/examples/stream_order.png)
 
-For more information about the `whitebox_tools` function and its arguments, please
-visit the [API Reference](https://pywbt.readthedocs.io/en/latest/reference/#pywbt.pywbt.whitebox_tools).
+For more examples, please visit PyWBT's [documentation](https://pywbt.readthedocs.io)
+and for more information about the `whitebox_tools` function and its arguments, please
+visit the
+[API Reference](https://pywbt.readthedocs.io/en/latest/reference/#pywbt.pywbt.whitebox_tools).
 Additionally, for more information on different tools that WBT offers and their
 arguments, please visit its
 [documentation](https://www.whiteboxgeo.com/manual/wbt_book/).
