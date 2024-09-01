@@ -2,19 +2,25 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
+
 import geopandas as gpd
-import rasterio
-from rasterio import features
-import rioxarray
-import pystac_client
+import numpy as np
 import planetary_computer
+import pystac_client
+import rasterio
+import rioxarray
 import rioxarray.merge as rxr_merge
 import shapely
-import numpy as np
+from rasterio import features
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
-def get_nasadem(bbox: tuple[float, float, float, float], tiff_path: str | Path, to_utm: bool = False)-> None:
+def get_nasadem(
+    bbox: tuple[float, float, float, float], tiff_path: str | Path, to_utm: bool = False
+) -> None:
     """Download a Digital Elevation Model (DEM) for a given bounding box from NASADEM.
 
     Parameters
@@ -33,18 +39,14 @@ def get_nasadem(bbox: tuple[float, float, float, float], tiff_path: str | Path, 
         utm = gdf.estimate_utm_crs()
         bbox_utm = gdf.to_crs(utm).total_bounds
         buff_size, dem_res = 20, 30
-        bbox_buff = gdf.to_crs(utm).buffer(buff_size*dem_res).to_crs(4326).total_bounds
+        bbox_buff = gdf.to_crs(utm).buffer(buff_size * dem_res).to_crs(4326).total_bounds
     catalog = pystac_client.Client.open(
         "https://planetarycomputer.microsoft.com/api/stac/v1",
         modifier=planetary_computer.sign_inplace,
     )
-    search = catalog.search(
-        collections=["nasadem"],
-        bbox=bbox_buff,
-    )
     signed_asset = (
         planetary_computer.sign(item.assets["elevation"]).href
-        for item in search.items()
+        for item in catalog.search(collections=["nasadem"], bbox=bbox_buff).items()
     )
     dem = rxr_merge.merge_arrays(
         [rioxarray.open_rasterio(href).squeeze(drop=True) for href in signed_asset]
@@ -55,9 +57,11 @@ def get_nasadem(bbox: tuple[float, float, float, float], tiff_path: str | Path, 
     dem.rio.to_raster(tiff_path)
 
 
-def tiff_to_gdf(tiff_path: str | Path, dtype: str, feat_name: str, connectivity: int = 8)-> gpd.GeoDataFrame:
-    """Converts a GeoTIFF to a GeoDataFrame.
-    
+def tiff_to_gdf(
+    tiff_path: str | Path, dtype: str, feat_name: str, connectivity: int = 8
+) -> gpd.GeoDataFrame:
+    """Convert a GeoTIFF to a GeoDataFrame.
+
     Parameters
     ----------
     tiff_path : str or pathlib.Path
@@ -84,8 +88,9 @@ def tiff_to_gdf(tiff_path: str | Path, dtype: str, feat_name: str, connectivity:
             transform=src.transform,
             connectivity=connectivity,
         )
-        gdf = gpd.GeoDataFrame.from_features([
-            {"geometry": geom, "properties": {feat_name: val}} for geom, val in feats_gen
-        ], crs=src.crs)
+        gdf = gpd.GeoDataFrame.from_features(
+            [{"geometry": geom, "properties": {feat_name: val}} for geom, val in feats_gen],
+            crs=src.crs,
+        )
         gdf[feat_name] = gdf[feat_name].astype(dtype)  # pyright: ignore[reportCallIssue,reportArgumentType]
     return gdf
