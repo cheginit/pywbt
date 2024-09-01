@@ -1,7 +1,7 @@
 # PyWBT: WhiteboxTools Wrapper for Python
 
 [![PyPI](https://img.shields.io/pypi/v/pywbt)](https://pypi.org/project/pywbt/)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)
+[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)
 
 ## Features
 
@@ -34,7 +34,7 @@ example of how to use PyWBT to run several tools:
 
 ```python
 wbt_args = {
-    "BreachDepressions": [f"-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
+    "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
     "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
     "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"],
     "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
