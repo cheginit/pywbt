@@ -246,6 +246,7 @@ exclude = [
   "**/__pycache__",
   "**/__init__.py",
   "tests/",
+  "docs/",
 ]
 include = [
   "src/pywbt",
