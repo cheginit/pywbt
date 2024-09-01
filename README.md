@@ -1,7 +1,7 @@
 # PyWBT: WhiteboxTools Wrapper for Python
 
 [![PyPI](https://img.shields.io/pypi/v/pywbt)](https://pypi.org/project/pywbt/)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)[![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/en/latest/?badge=latest)
+[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)[![codecov](https://codecov.io/gh/cheginit/pywbt/graph/badge.svg?token=U2638J9WKM)](https://codecov.io/gh/cheginit/pywbt)[![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/en/latest/?badge=latest)
 
 ## Features
 
