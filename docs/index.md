@@ -84,3 +84,8 @@ visit the
 Additionally, for more information on different tools that WBT offers and their
 arguments, please visit its
 [documentation](https://www.whiteboxgeo.com/manual/wbt_book/).
+
+## License
+
+PyWBT is licensed under the MIT License. For more information, please see the
+[LICENSE](LICENSE) file.

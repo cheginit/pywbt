@@ -97,8 +97,10 @@ nav:
 - Getting Started: index.md
 - Release Notes: CHANGELOG.md
 - Examples:
-  - Delineat Basin: examples/basin.ipynb
+  - examples/basin.ipynb
+  - examples/twi.ipynb
 - API Reference: reference.md
+- Contributing: CONTRIBUTING.md
 plugins:
 - search
 - mkdocs-jupyter:

@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from mkdocs.config.defaults import MkDocsConfig
 
 changelog = Path(__file__).parent.parent / "CHANGELOG.md"
+contributing = Path(__file__).parent.parent / "CONTRIBUTING.md"
 
 
 def on_files(files: Files, config: MkDocsConfig):
@@ -19,6 +20,14 @@ def on_files(files: Files, config: MkDocsConfig):
         File(
             path=changelog.name,
             src_dir=changelog.parent,
+            dest_dir=str(config.site_dir),
+            use_directory_urls=config.use_directory_urls,
+        )
+    )
+    files.append(
+        File(
+            path=contributing.name,
+            src_dir=contributing.parent,
             dest_dir=str(config.site_dir),
             use_directory_urls=config.use_directory_urls,
         )
