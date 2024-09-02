@@ -222,8 +222,10 @@ testpaths = [
 
 [tool.coverage.report]
 exclude_lines = [
-  'raise ServiceUnavailableError',
   "if TYPE_CHECKING:",
+]
+omit = [
+  "**/__init__.py",
 ]
 ignore_errors = true
 
@@ -235,9 +237,11 @@ omit = [
 
 [tool.coverage.run]
 branch = true
-parallel = true
 source = [
   "pywbt",
+]
+omit = [
+  "**/__init__.py",
 ]
 
 [tool.pyright]
