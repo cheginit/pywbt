@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Improvements to documentation including writing, the look and feel of the
+  documentations, and a new section for WBT workflows that can be found
+  [here](https://pywbt.readthedocs.io/latest/workflows).
+
 ## [0.2.0] - 2024-09-2
 
 ### Highlights
