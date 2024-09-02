@@ -46,9 +46,9 @@ A dictionary containing the tool names as keys and list of each
 tool's arguments as values. Note that the input and output file names should not
 contain the directory path, only the file names.
 - `files_to_save`:
-List of output files to save to the save_dir. Note that these should be the filenames
-without the directory path, just as they are used in the ``arg_dict``, i.e. the
-values that are passed by ``-o`` or ``--output`` in the WhiteboxTools command.
+List of output files to save to disk. Note that these should be the filenames
+without the directory path, just as they are used in ``arg_dict``, i.e. a subset
+of `arg_dict`'s values that are passed by ``-o`` or ``--output``.
 
 Some example workflows for `arg_dict` to carry out various geospatial operations are
 provided in the [Workflows](https://pywbt.readthedocs.io/latest/workflows/) section of the
