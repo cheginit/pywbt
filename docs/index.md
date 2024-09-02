@@ -1,7 +1,7 @@
 # PyWBT: WhiteboxTools Wrapper for Python
 
 [![PyPI](https://img.shields.io/pypi/v/pywbt)](https://pypi.org/project/pywbt/)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)[![codecov](https://codecov.io/gh/cheginit/pywbt/graph/badge.svg?token=U2638J9WKM)](https://codecov.io/gh/cheginit/pywbt)[![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/en/latest/?badge=latest)
+[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)[![codecov](https://codecov.io/gh/cheginit/pywbt/graph/badge.svg?token=U2638J9WKM)](https://codecov.io/gh/cheginit/pywbt)[![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/en/latest/?badge=latest)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cheginit/pywbt/HEAD?labpath=docs%2Fexamples)
 
 ## Features
 
@@ -9,6 +9,8 @@ PyWBT is a lightweight Python wrapper (only using Python's built-in modules) for
 the command-line interface of [WhiteboxTools](https://www.whiteboxgeo.com/) (WBT),
 a powerful Rust library for geospatial analysis. It is designed to simplify the use of WhiteboxTools by providing a Pythonic interface, allowing users to easily
 run tools and create custom workflows.
+
+You can try PyWBT in your browser by clicking on the binder badge above.
 
 ## Installation
 
