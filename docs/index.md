@@ -26,38 +26,29 @@ micromamba install -c conda-forge pywbt
 
 ## Usage
 
-PyWBT provides a simple interface to WhiteboxTools. There is just a single
-function called `whitebox_tools` that can be used to run different tools.
-This function has three required arguments:
+PyWBT provides a simple interface to WhiteboxTools (WBT). The main idea is to provide
+a single function called `whitebox_tools` that runs the user provided WBT recipes in a
+temporary directory and only saves the target output files instead of all the
+intermediate files. This function takes care of downloading the WBT executable for
+the user's operating system, setting up the environment, and running the tools.
+This `whitebox_tools` function has three required arguments:
 
-1. `src_dir` (a `str` or `Path`):
+- `src_dir`:
 Path to the source directory containing the input files. All user input files
 will be copied from this directory to a temporary directory for processing.
 Note that when using these files in ``arg_dict``, you should use the filenames
 without the directory path since they the internal working directory of the
 WhitboxTools is set to the temporary directory where the files are copied.
-
-2. `arg_dict` (a `dict`):
+- `arg_dict`:
 A dictionary containing the tool names as keys and list of each
-tool's arguments as values. For example:
-
-``` py
-{
-    "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
-    "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
-    "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"],
-}
-```
-
-Note that the input and output file names should not contain the directory path,
-only the file names.
-
-3. `files_to_save` (a `list` of `str`):
+tool's arguments as values. Note that the input and output file names should not
+contain the directory path, only the file names.
+- `files_to_save`:
 List of output files to save to the save_dir. Note that these should be the filenames
 without the directory path, just as they are used in the ``arg_dict``, i.e. the
 values that are passed by ``-o`` or ``--output`` in the WhiteboxTools command.
 
-Let's see an example of how to use PyWBT to run a simple workflow:
+Let's see an example of how to use PyWBT to run a WBT workflow:
 
 ``` py
 import pywbt
