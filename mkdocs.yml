@@ -108,6 +108,7 @@ nav:
   - Overview: examples/index.md
   - Delineate Basins: examples/basin.ipynb
   - Topographic Wetness Index (TWI): examples/twi.ipynb
+- workflows.md
 - API Reference: reference.md
 - Release Notes: CHANGELOG.md
 - Contributing: CONTRIBUTING.md

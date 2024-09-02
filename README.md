@@ -48,6 +48,10 @@ List of output files to save to the save_dir. Note that these should be the file
 without the directory path, just as they are used in the ``arg_dict``, i.e. the
 values that are passed by ``-o`` or ``--output`` in the WhiteboxTools command.
 
+Some example workflows for `arg_dict` to carry out geospatial operations are provided
+in the [Workflows](https://pywbt.readthedocs.io/latest/workflows/) section of the
+documentation.
+
 Let's see an example of how to use PyWBT to run a WBT workflow:
 
 ``` py
