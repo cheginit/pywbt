@@ -28,32 +28,54 @@ micromamba install -c conda-forge pywbt
 
 PyWBT provides a simple interface to WhiteboxTools. There is just a single
 function called `whitebox_tools` that can be used to run different tools.
-Considering that WBT is a command-line tool, it can generate intermediate files.
-A good practice for using PyWBT is to use Python's built-in `tempfile` module to
-create a temporary directory that gets deleted after the execution of the tools and
-only store the files that are necessary for further analysis. For example, if we
-have a DEM file called `dem.tif` in the current directory, we can use the following
-code to calculate the Strahler stream order:
+This function has three required arguments:
 
-```python
-import tempfile
-from pywbt import whitebox_tools
+1. `src_dir` (a `str` or `Path`):
+Path to the source directory containing the input files. All user input files
+will be copied from this directory to a temporary directory for processing.
+Note that when using these files in ``arg_dict``, you should use the filenames
+without the directory path since they the internal working directory of the
+WhitboxTools is set to the temporary directory where the files are copied.
 
+2. `arg_dict` (a `dict`):
+A dictionary containing the tool names as keys and list of each
+tool's arguments as values. For example:
 
-with tempfile.TemporaryDirectory(dir=".") as work_dir:
-    shutil.copy("dem.tif", work_dir)
-    wbt_args = {
-        "BreachDepressions": ["dem.tif", "--fill_pits", "-o=dem_corr.tif"],
-        "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
-        "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"],
-        "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
-        "StrahlerStreamOrder": ["--d8_pntr=fdir.tif", "--streams=streams.tif", "-o=strahler.tif"],
-    }
-    whitebox_tools(wbt_args, work_dir=work_dir)
-    shutil.copy(Path(work_dir) / "strahler.tif", "strahler.tif")
+``` py
+{
+    "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
+    "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
+    "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"],
+}
 ```
 
-![straher](https://raw.githubusercontent.com/cheginit/pywbt/main/docs/examples/stream_order.png)
+Note that the input and output file names should not contain the directory path,
+only the file names.
+
+3. `files_to_save` (a `list` of `str`):
+List of output files to save to the save_dir. Note that these should be the filenames
+without the directory path, just as they are used in the ``arg_dict``, i.e. the
+values that are passed by ``-o`` or ``--output`` in the WhiteboxTools command.
+
+Let's see an example of how to use PyWBT to run a simple workflow:
+
+``` py
+import pywbt
+
+fname = Path("path/to/input_files/dem.tif")
+wbt_args = {
+    "BreachDepressions": [f"-i={fname.name}", "--fill_pits", "-o=dem_corr.tif"],
+    "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
+    "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"],
+    "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
+    "FindMainStem": ["--d8_pntr=fdir.tif", "--streams=d8accum.tif", "-o=mainstem.tif"],
+    "StrahlerStreamOrder": ["--d8_pntr=fdir.tif", "--streams=streams.tif", "-o=strahler.tif"],
+    "Basins": ["--d8_pntr=fdir.tif", "-o=basins.tif"],
+}
+pywbt.whitebox_tools(fname.parent, wbt_args, ("strahler.tif", "mainstem.tif", "basins.tif"))
+```
+
+![strahler](https://raw.githubusercontent.com/cheginit/pywbt/main/docs/examples/images/stream_order.png)
 
 For more examples, please visit PyWBT's [documentation](https://pywbt.readthedocs.io)
 and for more information about the `whitebox_tools` function and its arguments, please

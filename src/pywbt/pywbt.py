@@ -83,7 +83,9 @@ def _extract_wbt(zip_path: Path, wbt_root: Path, temp_path: Path) -> None:
 
 
 def _download_wbt(
-    wbt_root: str | Path = "WBT", zip_path: str | Path | None = None, refresh_download: bool = False
+    wbt_root: str | Path = "WBT",
+    zip_path: str | Path | None = None,
+    refresh_download: bool = False,
 ) -> None:
     """Download the WhiteboxTools executable for the current platform."""
     platform_suffix = _get_platform_suffix()
@@ -178,10 +180,53 @@ def _run_wbt(
         raise RuntimeError(e.stderr) from e
 
 
+class _WBTSession:
+    """Context manager for running WhiteboxTools operations."""
+
+    def __init__(self, src_dir: Path, files_to_save: tuple[str, ...], save_dir: Path) -> None:
+        self.src_dir = src_dir
+        self.files_to_save = files_to_save
+        self.save_dir = save_dir
+
+    def run(
+        self,
+        wbt_args: dict[str, list[str]],
+        wbt_root: str | Path = "WBT",
+        compress_rasters: bool = False,
+        max_procs: int = -1,
+    ) -> None:
+        exe_name = "whitebox_tools.exe" if platform.system() == "Windows" else "whitebox_tools"
+        exe_path = Path(wbt_root) / exe_name
+        for tool_name, args in wbt_args.items():
+            _run_wbt(exe_path, tool_name, args, max_procs, compress_rasters, self.work_dir)
+
+    def __enter__(self) -> _WBTSession:  # noqa: PYI034
+        self.temp_dir = tempfile.TemporaryDirectory(dir=".")
+        self.work_dir = Path(self.temp_dir.name)
+        for file in self.src_dir.glob("*"):
+            shutil.copy(file, self.work_dir)
+        logging.info(f"Created temporary directory and copied source files: {self.work_dir}")
+        return self
+
+    def __exit__(self, *_) -> None:
+        for output_file in self.files_to_save:
+            source = self.work_dir / output_file
+            destination = Path(self.save_dir, output_file)
+            if source.exists():
+                shutil.copy(source, destination)
+                logging.info(f"Saved output file {source} to {destination}")
+            else:
+                logging.warning(f"Output file to save {source} not found")
+        self.temp_dir.cleanup()
+        logging.info(f"Cleaned up temporary directory: {self.work_dir}")
+
+
 def whitebox_tools(
+    src_dir: str | Path,
     arg_dict: dict[str, list[str]],
+    files_to_save: list[str] | tuple[str, ...],
+    save_dir: str | Path = "",
     wbt_root: str | Path = "WBT",
-    work_dir: str | Path = "",
     compress_rasters: bool = False,
     zip_path: str | Path | None = None,
     refresh_download: bool = False,
@@ -192,21 +237,33 @@ def whitebox_tools(
 
     Parameters
     ----------
+    src_dir : str or Path
+        Path to the source directory containing the input files. All user input files
+        will be copied from this directory to a temporary directory for processing.
+        Note that when using these files in ``arg_dict``, you should use the filenames
+        without the directory path since they the internal working directory of the
+        WhitboxTools is set to the temporary directory where the files are copied.
     arg_dict : dict
         A dictionary containing the tool names as keys and list of each
         tool's arguments as values. For example:
         ``` py
         {
-            "BreachDepressionsLeastCost": ["--dem='dem.tif'", "--output='breached_dem.tif'"],
+            "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
             "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
+            "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"],
         }
         ```
+        Note that the input and output file names should not contain the directory path,
+        only the file names.
+    files_to_save : list of str
+        List of output files to save to the save_dir. Note that these should be the filenames
+        without the directory path, just as they are used in the ``arg_dict``, i.e. the
+        values that are passed by ``-o`` or ``--output`` in the WhiteboxTools command.
+    save_dir : str or Path, optional
+        Path to the directory where the output files will be saved (default is current
+        working directory).
     wbt_root : str or Path, optional
         Path to the root directory containing the Whitebox executables (default is "WBT").
-    work_dir : str or Path, optional
-        Working directory for the tool (default is current directory).
-    verbose : bool, optional
-        Whether to print verbose output (default is False).
     compress_rasters : bool, optional
         Whether to compress output rasters (default is False).
     zip_path : str or Path, optional
@@ -231,11 +288,8 @@ def whitebox_tools(
     logger.setLevel(logging.INFO if verbose else logging.WARNING)
 
     wbt_root = Path(wbt_root)
-    work_dir = Path(work_dir) if work_dir else Path.cwd()
-    work_dir.mkdir(parents=True, exist_ok=True)
-
-    exe_name = "whitebox_tools.exe" if platform.system() == "Windows" else "whitebox_tools"
-    exe_path = wbt_root / exe_name
+    save_dir = Path(save_dir) if save_dir else Path.cwd()
+    save_dir.mkdir(parents=True, exist_ok=True)
 
     _download_wbt(wbt_root, zip_path, refresh_download)
 
@@ -244,5 +298,8 @@ def whitebox_tools(
     ):
         raise ValueError("arg_dict must be a dict of str keys and list or tuple values.")
 
-    for tool_name, args in arg_dict.items():
-        _run_wbt(exe_path, tool_name, args, max_procs, compress_rasters, work_dir)
+    if not isinstance(files_to_save, (list, tuple)):
+        raise TypeError("files_to_save must be a list or tuple of strings.")
+
+    with _WBTSession(Path(src_dir), tuple(files_to_save), Path(save_dir)) as wbt:
+        wbt.run(arg_dict, wbt_root, compress_rasters, max_procs)
