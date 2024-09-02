@@ -78,5 +78,4 @@ arguments, please visit its
 
 ## License
 
-PyWBT is licensed under the MIT License. For more information, please see the
-[LICENSE](LICENSE) file.
+PyWBT is licensed under the MIT License.

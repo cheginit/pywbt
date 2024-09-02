@@ -45,20 +45,29 @@ theme:
   - content.code.copy
   - content.action.edit
   - content.code.annotate
+  - navigation.sections
+  - navigation.expand
+  - navigation.collapse
   - navigation.instant
   - navigation.instant.progress
   - navigation.tracking
-  - navigation.sections
   - navigation.top
   - navigation.footer
   - navigation.indexes
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.path
   - search.suggest
   - search.highlight
+  - toc.follow
+  - toc.integrate
 
 repo_url: https://github.com/cheginit/pywbt/
 edit_uri: edit/main/docs/
 
 markdown_extensions:
+- attr_list
+- md_in_html
 - admonition
 - def_list
 - footnotes
@@ -95,11 +104,12 @@ extra:
 
 nav:
 - Getting Started: index.md
-- Release Notes: CHANGELOG.md
 - Examples:
-  - examples/basin.ipynb
-  - examples/twi.ipynb
+  - Overview: examples/index.md
+  - Delineate Basins: examples/basin.ipynb
+  - Topographic Wetness Index (TWI): examples/twi.ipynb
 - API Reference: reference.md
+- Release Notes: CHANGELOG.md
 - Contributing: CONTRIBUTING.md
 plugins:
 - search
@@ -127,3 +137,6 @@ plugins:
           show_source: false
 hooks:
 - docs/docs_hooks.py
+
+extra_css:
+- stylesheets/extra.css
