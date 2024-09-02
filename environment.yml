@@ -1,4 +1,4 @@
-name: pywbt
+name: wbt
 channels:
 - conda-forge
 - nodefaults
