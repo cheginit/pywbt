@@ -11,7 +11,11 @@ Contributing to this list is highly appreciated. You can just click on the `Edit
 ``` py
 {
     "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
-    "D8FlowAccumulation": ["-i=dem_corr.tif", "--out_type='specific contributing area'", "-o=sca.tif"],
+    "D8FlowAccumulation": [
+        "-i=dem_corr.tif",
+        "--out_type='specific contributing area'",
+        "-o=sca.tif",
+    ],
     "Slope": ["-i=dem_corr.tif", "--units=degrees", "-o=slope.tif"],
     "WetnessIndex": ["--sca=sca.tif", "--slope=slope.tif", "-o=twi.tif"],
 }
