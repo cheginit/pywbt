@@ -5,6 +5,8 @@ channels:
 dependencies:
 - python >=3.11
 
+- pywbt >=0.2.0
+
 # Deps for examples
 - folium
 - geopandas-base >=1
