@@ -1,0 +1,20 @@
+name: pywbt
+channels:
+- conda-forge
+- nodefaults
+dependencies:
+- python >=3.11
+
+# Deps for examples
+- folium
+- geopandas-base >=1
+- ipykernel
+- ipywidgets
+- mapclassify
+- matplotlib-base
+- planetary-computer
+- pyogrio
+- pystac-client
+- rasterio
+- rioxarray
+- shapely >=2
