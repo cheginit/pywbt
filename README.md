@@ -43,7 +43,7 @@ from pywbt import whitebox_tools
 with tempfile.TemporaryDirectory(dir=".") as work_dir:
     shutil.copy("dem.tif", work_dir)
     wbt_args = {
-        "BreachDepressions": ["dem.tif", "--fill_pits", "-o=dem_corr.tif"],
+        "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
         "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
         "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"],
         "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
