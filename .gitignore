@@ -104,10 +104,6 @@ ENV/
 # IDE settings
 .vscode/
 
-# logs
-.nvimlog
-data/
-tags*
 cache
 .pixi
 WBT
