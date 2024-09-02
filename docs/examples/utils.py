@@ -54,8 +54,7 @@ def get_nasadem(
         [rioxarray.open_rasterio(href).squeeze(drop=True) for href in signed_asset]  # pyright: ignore[reportArgumentType]
     )
     if to_utm:
-        dem = dem.rio.reproject(utm).fillna(dem.rio.nodata)
-        dem = dem.rio.clip_box(*bbox_utm)
+        dem = dem.rio.reproject(utm).fillna(dem.rio.nodata).rio.clip_box(*bbox_utm)
     dem.attrs.update({"units": "meters", "vertical_datum": "EGM96"})
     dem.name = "elevation"
     dem.astype("int16").rio.to_raster(tiff_path)
@@ -99,11 +98,9 @@ def get_3dep(
 
     dem = cast("xr.DataArray", rioxarray.open_rasterio(url[resolution]).squeeze())
     dem = dem.rio.clip_box(*bbox_buff)
-    dem = dem.where(dem > dem.rio.nodata, drop=False)
-    dem = dem.rio.write_nodata(np.nan)
+    dem = dem.where(dem > dem.rio.nodata, drop=False).rio.write_nodata(np.nan)
     if to_5070:
-        dem = dem.rio.reproject(crs_proj)
-        dem = dem.rio.clip_box(*bbox_proj)
+        dem = dem.rio.reproject(crs_proj).rio.clip_box(*bbox_proj)
     dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})
     dem.name = "elevation"
     dem.rio.to_raster(tiff_path)
