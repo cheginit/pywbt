@@ -1,21 +1,8 @@
 # Examples
 
-Although, PyWBT doesn't have any dependencies, the example notebooks require
-the following packages:
-
-- `folium`
-- `geopandas>=1`
-- `ipykernel`
-- `ipywidgets`
-- `mapclassify`
-- `matplotlib`
-- `planetary-computer`
-- `pystac-client`
-- `rasterio`
-- `rioxarray`
-- `shapely>=2`
-
-You can install all the dependencies using `micromamba` (or `conda` or `mamba`):
+Although, PyWBT doesn't have any dependencies, the example notebooks have several
+dependencies. You can install all the dependencies using `micromamba`
+(or `conda` or `mamba`):
 
 ``` bash
 micormamba create -n wbt pywbt folium geopandas-base>=1 ipykernel ipywidgets mapclassify matplotlib-base planetary-computer pyogrio pystac-client rasterio rioxarray shapely>=2
