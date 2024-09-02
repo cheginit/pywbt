@@ -20,7 +20,7 @@ jobs:
     - name: Generate Changelog
       run: |-
         echo "# Release Notes" > ${{ github.workflow }}-CHANGELOG.md
-        PAT="^##"
+        PAT="^## "
         L1=$(grep -n $PAT CHANGELOG.md | sed -n 2p | cut -d ":" -f 1)
         L2=$(grep -n $PAT CHANGELOG.md | sed -n 3p | cut -d ":" -f 1)
         if [ -z "$L2" ]; then
