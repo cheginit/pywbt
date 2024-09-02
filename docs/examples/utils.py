@@ -55,10 +55,10 @@ def get_nasadem(
     )
     if to_utm:
         dem = dem.rio.reproject(utm).fillna(dem.rio.nodata)
-        dem = dem.rio.clip_box(*bbox_utm).astype("int16")
+        dem = dem.rio.clip_box(*bbox_utm)
     dem.attrs.update({"units": "meters", "vertical_datum": "EGM96"})
     dem.name = "elevation"
-    dem.rio.to_raster(tiff_path)
+    dem.astype("int16").rio.to_raster(tiff_path)
 
 
 def get_3dep(
