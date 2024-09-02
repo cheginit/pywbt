@@ -114,6 +114,7 @@ def tiff_to_da(
     dtype: str | None = None,
     name: str | None = None,
     long_name: str | None = None,
+    nodata: float | None = None,
 ) -> xr.DataArray:
     """Read a GeoTIFF file into an xarray DataArray.
 
@@ -127,6 +128,8 @@ def tiff_to_da(
         Name to assign to the DataArray, by default None.
     long_name : str, optional
         Long name to assign to the DataArray, by default None.
+    nodata : int or float, optional
+        Value to use as nodata, by default None, i.e. use the nodata value from the GeoTIFF.
 
     Returns
     -------
@@ -134,6 +137,8 @@ def tiff_to_da(
         DataArray containing the GeoTIFF data.
     """
     ds = cast("xr.DataArray", rioxarray.open_rasterio(tiff_path).squeeze().load())
+    if nodata is not None:
+        ds = ds.rio.write_nodata(nodata)
     if dtype:
         ds = ds.astype(dtype)
     else:
