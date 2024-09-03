@@ -37,6 +37,7 @@ directory. This change makes the function more user-friendly and easier to use.
     Note that these should be the filenames without the directory path, just as they are
     used in the `arg_dict`, i.e. the values that are passed by `-o` or `--output` in the
     WhiteboxTools command.
+
   The removed argument is:
   - `work_dir`: This argument is no longer needed since the working directory is set to
     the temporary directory where the input files are copied.
