@@ -1,7 +1,7 @@
 # PyWBT: WhiteboxTools Wrapper for Python
 
 [![PyPI](https://img.shields.io/pypi/v/pywbt)](https://pypi.org/project/pywbt/)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)[![codecov](https://codecov.io/gh/cheginit/pywbt/graph/badge.svg?token=U2638J9WKM)](https://codecov.io/gh/cheginit/pywbt)[![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/en/latest/?badge=latest)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cheginit/pywbt/HEAD?labpath=docs%2Fexamples)
+[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)[![codecov](https://codecov.io/gh/cheginit/pywbt/graph/badge.svg?token=U2638J9WKM)](https://codecov.io/gh/cheginit/pywbt)[![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/latest/?badge=latest)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cheginit/pywbt/HEAD?labpath=docs%2Fexamples)
 
 ## Features
 
@@ -77,7 +77,7 @@ pywbt.whitebox_tools(fname.parent, wbt_args, ("strahler.tif", "mainstem.tif", "b
 For more examples, please visit PyWBT's [documentation](https://pywbt.readthedocs.io)
 and for more information about the `whitebox_tools` function and its arguments, please
 visit the
-[API Reference](https://pywbt.readthedocs.io/en/latest/reference/#pywbt.pywbt.whitebox_tools).
+[API Reference](https://pywbt.readthedocs.io/latest/reference/#pywbt.pywbt.whitebox_tools).
 Additionally, for more information on different tools that WBT offers and their
 arguments, please visit its
 [documentation](https://www.whiteboxgeo.com/manual/wbt_book/).
