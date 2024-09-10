@@ -16,7 +16,7 @@ def test_whitebox_tools(wbt_zipfile: str) -> None:
         "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
     }
     # To avoid redownloading and hitting the WBT server multiple times for testing
-    # on different platforms and Python versions, especially on CI, the binareis are
+    # on different platforms and Python versions, especially on CI, the binaries are
     # stored in `tests/wbt_zip` directory.
     with tempfile.TemporaryDirectory(suffix="test_", dir=".") as tmpdir:
         shutil.copy("tests/dem.tif", tmpdir)
