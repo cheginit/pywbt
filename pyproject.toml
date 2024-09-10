@@ -57,15 +57,14 @@ optional-dependencies.docs = [
 ]
 optional-dependencies.lint = [
   "pre-commit",
+  "codespell",
+  "tomli",
 ]
 optional-dependencies.test = [
   "coverage[toml]",
   "pytest-cov",
   "pytest-sugar",
   "rasterio",
-]
-optional-dependencies.typecheck = [
-  "pyright==1.1.378",
 ]
 urls.Changelog = "https://github.com/hyriver/pywbt/blob/main/CHANGELOG.md"
 urls.CI = "https://github.com/hyriver/pywbt/actions"
@@ -214,7 +213,7 @@ skip = "__pycache__,_build,.mypy_cache,.git,./htmlcov,cache,pixi.lock,**.ipynb"
 ignore-words-list = "gage,gages,paramss,trough"
 
 [tool.pytest.ini_options]
-addopts = "-v --durations=5"
+addopts = "-v --cov --junitxml=junit.xml --durations=5"
 doctest_optionflags = 'NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL NUMBER'
 testpaths = [
   "tests",
@@ -280,6 +279,9 @@ pywbt = { path = ".", editable = true }
 [tool.pixi.feature.lint.dependencies]
 pre-commit = "*"
 
+[tool.pixi.feature.typecheck.dependencies]
+pyright = "*"
+
 [tool.pixi.feature.py39.dependencies]
 python = "~=3.9.0"
 
@@ -295,13 +297,14 @@ dev = { features = [ "dev", "test", "py312" ] }
 docs = { features = [ "docs", "py312" ], no-default-feature = true }
 
 [tool.pixi.feature.test.tasks]
-test = "pytest --cov --junitxml=junit.xml"
+test = "pytest"
 report = { cmd = [ "coverage", "report" ], depends-on = [ "test" ] }
 html = { cmd = [ "coverage", "html" ], depends-on = [ "test", "report" ] }
 
 [tool.pixi.feature.lint.tasks]
 lint = "pre-commit run --all-files"
-pcup = "pre-commit autoupdate"
+pcupdate = "pre-commit autoupdate"
+spell = "codespell -w"
 
 [tool.pixi.feature.typecheck.tasks]
 typecheck = "pyright"
