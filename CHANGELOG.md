@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   documentations, and a new section for WBT workflows that can be found
   [here](https://pywbt.readthedocs.io/latest/workflows).
 
+### Changed
+
+- Improve performance by extracting and copying the input files using
+  `zipfile.ZipFile.extractall` and `shutil.copytree`.
+- Improve the logic of determining the type of system platform by only calling
+  `platform.system()` once and caching the result.
+- Improve the writing of the documentation.
+
 ## [0.2.0] - 2024-09-2
 
 ### Highlights
