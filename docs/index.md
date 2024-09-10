@@ -1,26 +1,29 @@
 # PyWBT: WhiteboxTools Wrapper for Python
 
 [![PyPI](https://img.shields.io/pypi/v/pywbt)](https://pypi.org/project/pywbt/)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)[![codecov](https://codecov.io/gh/cheginit/pywbt/graph/badge.svg?token=U2638J9WKM)](https://codecov.io/gh/cheginit/pywbt)[![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/en/latest/?badge=latest)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cheginit/pywbt/HEAD?labpath=docs%2Fexamples)
+[![Conda](https://img.shields.io/conda/vn/conda-forge/pywbt)](https://anaconda.org/conda-forge/pywbt)
+[![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/cheginit/pywbt/graph/badge.svg?token=U2638J9WKM)](https://codecov.io/gh/cheginit/pywbt)
+[![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/latest/?badge=latest)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cheginit/pywbt/HEAD?labpath=docs%2Fexamples)
 
 ## Features
 
-PyWBT is a lightweight Python wrapper (only using Python's built-in modules) for
-the command-line interface of [WhiteboxTools](https://www.whiteboxgeo.com/) (WBT),
-a powerful Rust library for geospatial analysis. It is designed to simplify the use of WhiteboxTools by providing a Pythonic interface, allowing users to easily
-run tools and create custom workflows.
+PyWBT is a lightweight Python wrapper for the command-line interface of [WhiteboxTools](https://www.whiteboxgeo.com/) (WBT), a powerful Rust library for geospatial analysis. Designed to simplify the use of WhiteboxTools, PyWBT provides a Pythonic interface that enables users to easily run tools and create custom workflows. Notably, PyWBT relies solely on Python's built-in modules, ensuring a minimal dependency footprint.
 
-You can try PyWBT in your browser by clicking on the binder badge above.
+Try PyWBT in your browser by clicking on the Binder badge above.
 
 ## Installation
 
-PyWBT can be installed using `pip`:
+You can install PyWBT using either `pip` or `micromamba`:
+
+Using `pip`:
 
 ```bash
 pip install pywbt
 ```
 
-or `micromamba` (`conda` or `mamba` can also be used):
+Using `micromamba` (or `conda`/`mamba`):
 
 ```bash
 micromamba install -c conda-forge pywbt
@@ -28,36 +31,23 @@ micromamba install -c conda-forge pywbt
 
 ## Usage
 
-PyWBT provides a simple interface to WhiteboxTools (WBT). The main idea is to provide
-a single function called `whitebox_tools` that runs the user provided WBT recipes in a
-temporary directory and only saves the target output files instead of all the
-intermediate files. This function takes care of downloading the WBT executable for
-the user's operating system, setting up the environment, and running the tools.
-This `whitebox_tools` function has three required arguments:
+PyWBT offers a streamlined interface to WhiteboxTools (WBT) through a single function called `whitebox_tools`. This function executes user-provided WBT workflows in a temporary directory, saving only the specified output files rather than all intermediate files. It handles downloading the WBT executable for the user's operating system, setting up the environment, and running the tools.
 
-- `src_dir`:
-Path to the source directory containing the input files. All user input files
-will be copied from this directory to a temporary directory for processing.
-Note that when using these files in ``arg_dict``, you should use the filenames
-without the directory path since they the internal working directory of the
-WhitboxTools is set to the temporary directory where the files are copied.
-- `arg_dict`:
-A dictionary containing the tool names as keys and list of each
-tool's arguments as values. Note that the input and output file names should not
-contain the directory path, only the file names.
-- `files_to_save`:
-List of output files to save to disk. Note that these should be the filenames
-without the directory path, just as they are used in ``arg_dict``, i.e. a subset
-of `arg_dict`'s values that are passed by ``-o`` or ``--output``.
+The `whitebox_tools` function has several arguments, with three being mandatory and the rest optional. The three required arguments are:
 
-Some example workflows for `arg_dict` to carry out various geospatial operations are
-provided in the [Workflows](https://pywbt.readthedocs.io/latest/workflows/) section of the
-documentation.
+1. `src_dir`: Path to the source directory containing input files. All user input files are copied from this directory to a temporary directory for processing.
 
-Let's see an example of how to use PyWBT to run a WBT workflow:
+2. `arg_dict`: A dictionary with tool names as keys and lists of each tool's arguments as values. Input and output filenames should be specified without directory paths.
 
-``` py
+3. `files_to_save`: List of output files to save to disk, specified without directory paths (as used in `arg_dict`).
+
+For example workflows using `arg_dict` to perform geospatial operations, refer to the [Workflows](https://pywbt.readthedocs.io/latest/workflows/) section of the documentation. We encourage users to contribute to this section by providing sequences of geospatial operations for performing specific tasks, helping to build a comprehensive resource for the community.
+
+Here's an example demonstrating how to use PyWBT to run a WBT workflow:
+
+```python
 import pywbt
+from pathlib import Path
 
 fname = Path("path/to/input_files/dem.tif")
 wbt_args = {
@@ -72,16 +62,6 @@ wbt_args = {
 pywbt.whitebox_tools(fname.parent, wbt_args, ("strahler.tif", "mainstem.tif", "basins.tif"))
 ```
 
-![strahler](https://raw.githubusercontent.com/cheginit/pywbt/main/docs/examples/images/stream_order.png)
+![Strahler Stream Order](https://raw.githubusercontent.com/cheginit/pywbt/main/docs/examples/images/stream_order.png)
 
-For more examples, please visit PyWBT's [documentation](https://pywbt.readthedocs.io)
-and for more information about the `whitebox_tools` function and its arguments, please
-visit the
-[API Reference](https://pywbt.readthedocs.io/en/latest/reference/#pywbt.pywbt.whitebox_tools).
-Additionally, for more information on different tools that WBT offers and their
-arguments, please visit its
-[documentation](https://www.whiteboxgeo.com/manual/wbt_book/).
-
-## License
-
-PyWBT is licensed under the MIT License.
+For more examples, please visit PyWBT's [documentation](https://pywbt.readthedocs.io). For detailed information about the `whitebox_tools` function and its arguments, refer to the [API Reference](https://pywbt.readthedocs.io/latest/reference/#pywbt.pywbt.whitebox_tools). Additionally, for comprehensive information on the various tools offered by WBT and their arguments, consult its [documentation](https://www.whiteboxgeo.com/manual/wbt_book/).
