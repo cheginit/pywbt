@@ -65,7 +65,7 @@ optional-dependencies.test = [
   "rasterio",
 ]
 optional-dependencies.typecheck = [
-  "pyright",
+  "pyright==1.1.378",
 ]
 urls.Changelog = "https://github.com/hyriver/pywbt/blob/main/CHANGELOG.md"
 urls.CI = "https://github.com/hyriver/pywbt/actions"
@@ -291,7 +291,7 @@ test39 = { features = [ "test", "py39" ] }
 test312 = { features = [ "test", "py312" ] }
 lint = { features = [ "lint", "py312" ], no-default-feature = true }
 typecheck = { features = [ "typecheck", "py312" ] }
-dev = { features = [ "dev", "py312" ] }
+dev = { features = [ "dev", "test", "py312" ] }
 docs = { features = [ "docs", "py312" ], no-default-feature = true }
 
 [tool.pixi.feature.test.tasks]
@@ -301,6 +301,7 @@ html = { cmd = [ "coverage", "html" ], depends-on = [ "test", "report" ] }
 
 [tool.pixi.feature.lint.tasks]
 lint = "pre-commit run --all-files"
+pcup = "pre-commit autoupdate"
 
 [tool.pixi.feature.typecheck.tasks]
 typecheck = "pyright"
