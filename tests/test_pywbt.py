@@ -18,12 +18,13 @@ def test_whitebox_tools(wbt_zipfile: str) -> None:
     # To avoid redownloading and hitting the WBT server multiple times for testing
     # on different platforms and Python versions, especially on CI, the binaries are
     # stored in `tests/wbt_zip` directory.
-    with tempfile.TemporaryDirectory(suffix="test_", dir=".") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="test_", dir=".") as tmpdir:
         shutil.copy("tests/dem.tif", tmpdir)
         pywbt.whitebox_tools(
             tmpdir,
             wbt_args,
             ["streams.tif"],
+            wbt_root=f"{tmpdir}/WBT",
             zip_path=f"tests/wbt_zip/{wbt_zipfile}",
         )
     with rasterio.open("streams.tif") as src:
