@@ -295,7 +295,7 @@ dev = { features = [ "dev", "test", "py312" ] }
 docs = { features = [ "docs", "py312" ], no-default-feature = true }
 
 [tool.pixi.feature.test.tasks]
-test = "pytest --cov --cov-append --cov-report=xml"
+test = "pytest --cov --junitxml=junit.xml"
 report = { cmd = [ "coverage", "report" ], depends-on = [ "test" ] }
 html = { cmd = [ "coverage", "html" ], depends-on = [ "test", "report" ] }
 
