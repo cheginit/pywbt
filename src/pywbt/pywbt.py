@@ -65,11 +65,10 @@ def _extract_wbt(zip_path: Path, wbt_root: Path, temp_path: Path, system: System
         shutil.copytree(str(wbt_dir), wbt_root, dirs_exist_ok=True)
 
         if system != "Windows":
-            for exec_name in ("whitebox_tools", "whitebox_runner"):
-                exec_path = wbt_root / exec_name
-                exec_path.chmod(
-                    exec_path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-                )
+            exec_path = wbt_root / "whitebox_tools"
+            exec_path.chmod(
+                exec_path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+            )
 
         logger.info(f"Extracted WhiteboxTools to {wbt_root}")
     except zipfile.BadZipFile as e:
