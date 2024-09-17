@@ -222,6 +222,9 @@ testpaths = [
 [tool.coverage.report]
 exclude_lines = [
   "if TYPE_CHECKING:",
+  "except zipfile.BadZipFile",
+  "except FileNotFoundError",
+  "except shutil.Error",
 ]
 omit = [
   "**/__init__.py",
