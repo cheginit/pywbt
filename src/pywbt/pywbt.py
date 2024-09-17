@@ -174,13 +174,35 @@ def _run_wbt(
 
 
 class _WBTSession:
-    """Context manager for running WhiteboxTools operations."""
+    """Context manager for running WhiteboxTools operations.
 
-    def __init__(self, src_dir: Path, files_to_save: tuple[str, ...], save_dir: Path) -> None:
+    Parameters
+    ----------
+    src_dir : Path
+        Source directory containing input files.
+    save_dir : Path, optional
+        Directory to save the output files.
+    files_to_save : tuple of str
+        Files to save after the session. If ``None``, keep all intermediate files.
+    """
+
+    def __init__(
+        self, src_dir: Path, save_dir: Path, files_to_save: tuple[str, ...] | None
+    ) -> None:
         self.src_dir = src_dir
         self.files_to_save = files_to_save
         self.save_dir = save_dir
         self.system, _ = _get_platform_suffix()
+
+    @staticmethod
+    def _extract_outputs(wbt_args: dict[str, list[str]]) -> list[str]:
+        """Extract output filenames from WhiteboxTools arguments."""
+        outputs = []
+        for args in wbt_args.values():
+            outputs.extend(
+                arg.split("=")[1] for arg in args if arg.startswith(("-o=", "--output="))
+            )
+        return outputs
 
     def run(
         self,
@@ -189,36 +211,59 @@ class _WBTSession:
         compress_rasters: bool,
         max_procs: int,
     ) -> None:
+        """
+        Run WhiteboxTools operations.
+
+        Parameters
+        ----------
+        wbt_args : dict of str to list of str
+            Arguments for WhiteboxTools.
+        wbt_root : str or Path
+            Root directory of WhiteboxTools.
+        compress_rasters : bool
+            Whether to compress rasters.
+        max_procs : int
+            Maximum number of processes to use.
+        """
         exe_name = "whitebox_tools.exe" if self.system == "Windows" else "whitebox_tools"
         exe_path = Path(wbt_root) / exe_name
+        self.outputs = self._extract_outputs(wbt_args)
         for tool_name, args in wbt_args.items():
-            _run_wbt(exe_path, tool_name, args, max_procs, compress_rasters, self.work_dir)
+            _run_wbt(exe_path, tool_name, args, max_procs, compress_rasters, self.src_dir)
 
     def __enter__(self) -> _WBTSession:  # noqa: PYI034
-        self.temp_dir = tempfile.TemporaryDirectory(dir=".")
-        self.work_dir = Path(self.temp_dir.name)
-        shutil.copytree(self.src_dir, self.work_dir, dirs_exist_ok=True)
-        logging.info(f"Created temporary directory and copied source files: {self.work_dir}")
+        logger.info(
+            f"Starting WhiteboxTools session with source directory: {self.src_dir.absolute()}"
+        )
         return self
 
     def __exit__(self, *_) -> None:
-        for output_file in self.files_to_save:
-            source = self.work_dir / output_file
-            destination = Path(self.save_dir, output_file)
-            if source.exists():
-                shutil.copy(source, destination)
-                logging.info(f"Saved output file {source} to {destination}")
-            else:
-                logging.warning(f"Output file to save {source} not found")
-        self.temp_dir.cleanup()
-        logging.info(f"Cleaned up temporary directory: {self.work_dir}")
+        if self.files_to_save is not None:
+            for f in self.outputs:
+                source = self.src_dir / f
+                if not source.exists():
+                    logger.exception(f"Output file to save {source} not found")
+                    raise FileNotFoundError(f"Output file to save {source} not found")
+                destination = Path(self.save_dir, f)
+                if f in self.files_to_save:
+                    shutil.move(source, destination)
+                    logger.info(f"Moved output file {source} to {destination}")
+                else:
+                    source.unlink()
+                    logger.info(f"Deleted intermediate file {source}")
+        else:
+            for file in self.outputs:
+                shutil.move(file, self.save_dir)
+        logger.info(
+            f"Completed WhiteboxTools session with source directory: {self.src_dir.absolute()}"
+        )
 
 
 def whitebox_tools(
     src_dir: str | Path,
     arg_dict: dict[str, list[str]],
-    files_to_save: list[str] | tuple[str, ...],
-    save_dir: str | Path = "",
+    files_to_save: list[str] | tuple[str, ...] | None = None,
+    save_dir: str | Path = ".",
     wbt_root: str | Path = "WBT",
     compress_rasters: bool = False,
     zip_path: str | Path | None = None,
@@ -239,7 +284,7 @@ def whitebox_tools(
     arg_dict : dict
         A dictionary containing the tool names as keys and list of each
         tool's arguments as values. For example:
-        ``` py
+        ```python
         {
             "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
             "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
@@ -248,10 +293,11 @@ def whitebox_tools(
         ```
         Note that the input and output file names should not contain the directory path,
         only the filenames.
-    files_to_save : list of str
+    files_to_save : list, optional
         List of output files to save to ``save_dir``. Note that these should be the filenames
         without the directory path, just as they are used in the ``arg_dict``, i.e. the
-        values that are passed by ``-o`` or ``--output``.
+        values that are passed by ``-o`` or ``--output``. Defaults to ``None``, which means
+        all intermediate files will be saved to ``save_dir``.
     save_dir : str or Path, optional
         Path to the directory where the output files given in ``files_to_save`` will be saved
         (default is current working directory).
@@ -294,5 +340,5 @@ def whitebox_tools(
     if not isinstance(files_to_save, (list, tuple)):
         raise TypeError("files_to_save must be a list or tuple of strings.")
 
-    with _WBTSession(Path(src_dir), tuple(files_to_save), Path(save_dir)) as wbt:
+    with _WBTSession(Path(src_dir), Path(save_dir), tuple(files_to_save)) as wbt:
         wbt.run(arg_dict, wbt_root, compress_rasters, max_procs)
