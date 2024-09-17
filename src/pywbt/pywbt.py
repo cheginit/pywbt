@@ -187,7 +187,7 @@ class _WBTSession:
     """
 
     def __init__(
-        self, src_dir: Path, save_dir: Path, files_to_save: tuple[str, ...] | None
+        self, src_dir: Path, save_dir: Path, files_to_save: list[str] | tuple[str, ...] | None
     ) -> None:
         self.src_dir = src_dir
         self.files_to_save = files_to_save
@@ -238,22 +238,29 @@ class _WBTSession:
         return self
 
     def __exit__(self, *_) -> None:
-        if self.files_to_save is not None:
-            for f in self.outputs:
-                source = self.src_dir / f
-                if not source.exists():
-                    logger.exception(f"Output file to save {source} not found")
-                    raise FileNotFoundError(f"Output file to save {source} not found")
-                destination = Path(self.save_dir, f)
-                if f in self.files_to_save:
-                    shutil.move(source, destination)
-                    logger.info(f"Moved output file {source} to {destination}")
-                else:
-                    source.unlink()
-                    logger.info(f"Deleted intermediate file {source}")
-        else:
+        if self.save_dir != self.src_dir:
+            self.save_dir.mkdir(parents=True, exist_ok=True)
+            if self.files_to_save is not None:
+                for file in self.outputs:
+                    source = self.src_dir / file
+                    if not source.exists():
+                        logger.exception(f"Output file to save {source} not found")
+                        raise FileNotFoundError(f"Output file to save {source} not found")
+                    destination = Path(self.save_dir, file)
+                    if file in self.files_to_save:
+                        shutil.move(source, destination)
+                        logger.info(f"Moved output file {source} to {destination}")
+                    else:
+                        source.unlink()
+                        logger.info(f"Deleted intermediate file {source}")
+            else:
+                for file in self.outputs:
+                    shutil.move(self.src_dir / file, self.save_dir)
+        elif self.files_to_save is not None:
             for file in self.outputs:
-                shutil.move(file, self.save_dir)
+                if file not in self.files_to_save:
+                    Path(self.src_dir / file).unlink()
+                    logger.info(f"Deleted intermediate file {file}")
         logger.info(
             f"Completed WhiteboxTools session with source directory: {self.src_dir.absolute()}"
         )
@@ -337,8 +344,8 @@ def whitebox_tools(
     ):
         raise ValueError("arg_dict must be a dict of str keys and list or tuple values.")
 
-    if not isinstance(files_to_save, (list, tuple)):
+    if not (files_to_save is None or isinstance(files_to_save, (list, tuple))):
         raise TypeError("files_to_save must be a list or tuple of strings.")
 
-    with _WBTSession(Path(src_dir), Path(save_dir), tuple(files_to_save)) as wbt:
+    with _WBTSession(Path(src_dir), Path(save_dir), files_to_save) as wbt:
         wbt.run(arg_dict, wbt_root, compress_rasters, max_procs)
