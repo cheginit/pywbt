@@ -103,7 +103,7 @@ extra:
     link: https://github.com/cheginit
 
 nav:
-- Getting Started: index.md
+- Getting Started: README.md
 - Examples:
   - Overview: examples/index.md
   - Delineate Basins: examples/basin.ipynb
