@@ -56,8 +56,8 @@ optional-dependencies.docs = [
   "mkdocstrings-python",
 ]
 optional-dependencies.lint = [
-  "pre-commit",
   "codespell",
+  "pre-commit",
   "tomli",
 ]
 optional-dependencies.test = [
@@ -311,7 +311,10 @@ typecheck = "pyright"
 
 [tool.fixit]
 formatter = "ufmt"
+disable = [
+  ".rules:NoStringTypeAnnotation",
+]
 
 [tool.refurb]
-python_version = "3.8"
+python_version = "3.9"
 quiet = true
