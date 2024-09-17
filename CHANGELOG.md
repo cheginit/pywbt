@@ -7,14 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## \[Unreleased\]
 
+## \[0.2.1\] - 2024-09-17
+
 ### Added
 
+- Make `files_to_save` optional in the `whitebox_tools` function. If not provided, all
+    generated intermediate files will be stored in `save_dir` (default is the source
+    directory).
 - Improvements to documentation including writing, the look and feel of the
     documentations, and a new section for WBT workflows that can be found
     [here](https://pywbt.readthedocs.io/latest/workflows).
 
 ### Changed
 
+- Avoid copying all files from the `src_dir` to the temporary directory,
+    instead, run the tools in the `src_dir` itself. This change will
+    avoid copying large files and could improve performance. With this change,
+    all intermediate files will be stored in `src_dir` unless `files_to_save`
+    is provided which will save only the specified output files and delete the
+    rest of the intermediate files.
 - Improve performance by extracting and copying the input files using
     `zipfile.ZipFile.extractall` and `shutil.copytree`.
 - Improve the logic of determining the type of system platform by only calling
