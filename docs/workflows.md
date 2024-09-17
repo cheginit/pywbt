@@ -8,7 +8,7 @@ Contributing to this list is highly appreciated. You can just click on the `Edit
 
 ## Topographic Wetness Index
 
-``` py
+```py
 {
     "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
     "D8FlowAccumulation": [
@@ -23,7 +23,7 @@ Contributing to this list is highly appreciated. You can just click on the `Edit
 
 ## Basin Delineation
 
-``` py
+```py
 {
     "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
     "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
@@ -33,7 +33,7 @@ Contributing to this list is highly appreciated. You can just click on the `Edit
 
 ## Extract Streams
 
-``` py
+```py
 {
     "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
     "D8FlowAccumulation": ["-i=dem_corr.tif", "-o=d8accum.tif"],
@@ -43,7 +43,7 @@ Contributing to this list is highly appreciated. You can just click on the `Edit
 
 ## Find Mainstems
 
-``` py
+```py
 {
     "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
     "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],

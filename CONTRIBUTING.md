@@ -1,4 +1,5 @@
 <!-- omit in toc -->
+
 # Contributing to PyWBT
 
 First off, thanks for taking the time to contribute! ❤️
@@ -13,14 +14,15 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 > - Mention the project at local meetups and tell your friends/colleagues
 
 <!-- omit in toc -->
+
 ## Table of Contents
 
 - [I Have a Question](#i-have-a-question)
 - [I Want To Contribute](#i-want-to-contribute)
-  - [Reporting Bugs](#reporting-bugs)
-  - [Suggesting Enhancements](#suggesting-enhancements)
-  - [Your First Code Contribution](#your-first-code-contribution)
-  - [Improving The Documentation](#improving-the-documentation)
+    - [Reporting Bugs](#reporting-bugs)
+    - [Suggesting Enhancements](#suggesting-enhancements)
+    - [Your First Code Contribution](#your-first-code-contribution)
+    - [Improving The Documentation](#improving-the-documentation)
 
 ## I Have a Question
 
@@ -45,6 +47,7 @@ We will then take care of the issue as soon as possible.
 ### Reporting Bugs
 
 <!-- omit in toc -->
+
 #### Before Submitting a Bug Report
 
 A good bug report shouldn't leave others needing to chase you up for more information. Therefore, we ask you to investigate carefully, collect information and describe the issue in detail in your report. Please complete the following steps in advance to help us fix any potential bug as fast as possible.
@@ -54,13 +57,14 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 - To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://github.com/cheginit/pywbtissues?q=label%3Abug).
 - Also make sure to search the internet (including Stack Overflow) to see if users outside of the GitHub community have discussed the issue.
 - Collect information about the bug:
-  - Stack trace (Traceback)
-  - OS, Platform and Version (Windows, Linux, macOS, x86, ARM)
-  - Version of the interpreter, compiler, SDK, runtime environment, package manager, depending on what seems relevant.
-  - Possibly your input and the output
-  - Can you reliably reproduce the issue? And can you also reproduce it with older versions?
+    - Stack trace (Traceback)
+    - OS, Platform and Version (Windows, Linux, macOS, x86, ARM)
+    - Version of the interpreter, compiler, SDK, runtime environment, package manager, depending on what seems relevant.
+    - Possibly your input and the output
+    - Can you reliably reproduce the issue? And can you also reproduce it with older versions?
 
 <!-- omit in toc -->
+
 #### How Do I Submit a Good Bug Report?
 
 > You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to <cheginit@gmail.com>.
@@ -83,6 +87,7 @@ Once it's filed:
 This section guides you through submitting an enhancement suggestion for PyWBT, **including completely new features and minor improvements to existing functionality**. Following these guidelines will help maintainers and the community to understand your suggestion and find related suggestions.
 
 <!-- omit in toc -->
+
 #### Before Submitting an Enhancement
 
 - Make sure that you are using the latest version.
@@ -91,6 +96,7 @@ This section guides you through submitting an enhancement suggestion for PyWBT, 
 - Find out whether your idea fits with the scope and aims of the project. It's up to you to make a strong case to convince the project's developers of the merits of this feature. Keep in mind that we want features that will be useful to the majority of our users and not just a small subset. If you're just targeting a minority of users, consider writing an add-on/plugin library.
 
 <!-- omit in toc -->
+
 #### How Do I Submit a Good Enhancement Suggestion?
 
 Enhancement suggestions are tracked as [GitHub issues](https://github.com/cheginit/pywbt/issues).
@@ -114,13 +120,13 @@ This will install all the necessary dependencies for the project. Once you make 
 to the project, there are six steps that you need to follow:
 
 1. Add tests for your changes either in `tests/test_pywbt.py` file or
-  create a new file in the `tests` directory with the name `test_<module_name>.py`.
-2. Run `pixi r -e test39` and `pixi r -e test312` to run the tests.
-3. Run `pixi lint` for auto-formatting and to check any linting errors.
-4. Run `pixi r typecheck` to check for type errors.
-5. Document your changes in the `CHANGELOG.md` file. Please make sure to
-  include any associated issue numbers, if applicable, and your GitHub username.
-6. Commit your changes using the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification and create a pull request.
+    create a new file in the `tests` directory with the name `test_<module_name>.py`.
+1. Run `pixi r -e test39` and `pixi r -e test312` to run the tests.
+1. Run `pixi lint` for auto-formatting and to check any linting errors.
+1. Run `pixi r typecheck` to check for type errors.
+1. Document your changes in the `CHANGELOG.md` file. Please make sure to
+    include any associated issue numbers, if applicable, and your GitHub username.
+1. Commit your changes using the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification and create a pull request.
 
 ### Improving The Documentation
 
@@ -129,6 +135,7 @@ official PyWBT docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
 <!-- omit in toc -->
+
 ## Attribution
 
 This guide is based on the **contributing-gen**. [Make your own](https://github.com/bttger/contributing-gen)!
