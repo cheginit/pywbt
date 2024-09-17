@@ -19,9 +19,6 @@ jobs:
   test:
     name: python ${{ matrix.environment }}, ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash -l {0}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -33,8 +30,11 @@ jobs:
       with:
         pixi-version: v0.29.0
         environments: ${{ matrix.environment }}
+        activate-environment: ${{ matrix.environment }}
+        cache: true
+        cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
     - name: Run pixi
-      run: pixi r -e ${{ matrix.environment }} test
+      run: pixi r test
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
