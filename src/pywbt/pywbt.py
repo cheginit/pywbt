@@ -66,9 +66,7 @@ def _extract_wbt(zip_path: Path, wbt_root: Path, temp_path: Path, system: System
 
         if system != "Windows":
             exec_path = wbt_root / "whitebox_tools"
-            exec_path.chmod(
-                exec_path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-            )
+            exec_path.chmod(exec_path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
         logger.info(f"Extracted WhiteboxTools to {wbt_root}")
     except zipfile.BadZipFile as e:
