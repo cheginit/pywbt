@@ -12,14 +12,6 @@ repos:
     additional_dependencies:
     - ufmt
 
-- repo: https://github.com/asottile/blacken-docs
-  rev: 1.18.0
-  hooks:
-  - id: blacken-docs
-    name: Autoformat codes in docstrings with blacken-docs
-    additional_dependencies: [black]
-    args: [-t, py38, -l, '100']
-
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.6.5
   hooks:
@@ -100,3 +92,14 @@ repos:
   - id: actionlint
     files: .github/workflows/
     args: [-ignore, SC1090, -ignore, SC2046, -ignore, SC2086, -ignore, SC2129, -ignore, SC2155]
+
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.17
+  hooks:
+  - id: mdformat
+    additional_dependencies:
+    - mdformat-black
+    - mdformat-myst
+    - mdformat-mkdocs
+    - mdformat-toc
+    - mdformat-admon
