@@ -33,8 +33,6 @@ jobs:
       with:
         pixi-version: v0.29.0
         environments: ${{ matrix.environment }}
-        cache: true
-        cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
     - name: Run pixi
       run: pixi r -e ${{ matrix.environment }} test
 
