@@ -47,9 +47,9 @@ up the environment, and running the tools.
 The `whitebox_tools` function has several arguments, with two being mandatory and the rest
 optional. The two required arguments are:
 
-1. `src_dir`: Path to the source directory containing input files. All user input files
-    are copied from this directory to a temporary directory for processing.
-
+1. `src_dir`: This will be the working directory for the WhiteboxTools session. The input
+    files should be in this directory. Thus, when using the files in this directory in
+    `arg_dict`, you must just use the filenames without the directory path.
 1. `arg_dict`: A dictionary with tool names as keys and lists of each tool's arguments
     as values. Input and output filenames should be specified without directory paths.
 
