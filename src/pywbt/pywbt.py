@@ -306,22 +306,23 @@ def whitebox_tools(
         all intermediate files will be saved to ``save_dir``.
     save_dir : str or Path, optional
         Path to the directory where the output files given in ``files_to_save`` will be saved
-        (default is current working directory).
+        (default is ``"."``, i.e., current working directory).
     wbt_root : str or Path, optional
-        Path to the directory the Whitebox executables will be extracted to (default is "WBT").
+        Path to the directory the Whitebox executables will be extracted to
+        (default is ``"WBT"``).
     zip_path : str or Path, optional
-        Path to the zip file containing the WhiteboxTools executables (default is None).
-        If None, the zip file will be downloaded to a temporary directory that gets
+        Path to the zip file containing the WhiteboxTools executables (default is ``None``).
+        If ``None``, the zip file will be downloaded to a temporary directory that gets
         deleted after the function finishes. Otherwise, the zip file will be saved to
         the specified path.
     refresh_download : bool, optional
-        Whether to refresh the download if WhiteboxTools is found (default is False).
+        Whether to refresh the download if WhiteboxTools is found (default is ``False``).
     compress_rasters : bool, optional
-        Whether to compress output rasters (default is False).
+        Whether to compress output rasters (default is ``False``).
     max_procs : int, optional
-        The maximum number of processes to use (default is 1).
+        The maximum number of processes to use (default is ``-1``).
     verbose : bool, optional
-        Whether to print verbose output (default is False).
+        Whether to print verbose output (default is ``False``).
 
     Raises
     ------
