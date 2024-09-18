@@ -231,13 +231,8 @@ class _WBTSession:
         for tool_name, args in wbt_args.items():
             _run_wbt(exe_path, tool_name, args, max_procs, compress_rasters, self.src_dir)
 
-    def __enter__(self) -> _WBTSession:  # noqa: PYI034
-        logger.info(
-            f"Starting WhiteboxTools session with source directory: {self.src_dir.absolute()}"
-        )
-        return self
-
-    def __exit__(self, *_) -> None:
+    def _cleanup(self) -> None:
+        """Delete intermediate files and move output files to save_dir."""
         if self.save_dir != self.src_dir:
             self.save_dir.mkdir(parents=True, exist_ok=True)
             if self.files_to_save is not None:
@@ -261,9 +256,28 @@ class _WBTSession:
                 if file not in self.files_to_save:
                     Path(self.src_dir / file).unlink()
                     logger.info(f"Deleted intermediate file {file}")
+
+    def __enter__(self) -> _WBTSession:  # noqa: PYI034
+        logger.info(
+            f"Starting WhiteboxTools session with source directory: {self.src_dir.absolute()}"
+        )
+        return self
+
+    def __exit__(
+        self, exc_type: type[BaseException] | None, exc_value: BaseException | None, *_
+    ) -> bool:
+        # If an exception occurred, propagate it
+        if exc_type is not None:
+            for file in self.outputs:
+                Path(self.src_dir / file).unlink(missing_ok=True)
+            logger.info("Deleted all intermediate files.")
+            logger.exception(f"An error occurred: {exc_value}")
+            return False
+        self._cleanup()
         logger.info(
             f"Completed WhiteboxTools session with source directory: {self.src_dir.absolute()}"
         )
+        return True
 
 
 def whitebox_tools(
