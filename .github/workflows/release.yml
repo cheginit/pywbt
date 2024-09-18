@@ -21,12 +21,12 @@ jobs:
       run: |-
         echo "# Release Notes" > ${{ github.workflow }}-CHANGELOG.md
         PAT="^## "
-        L1=$(grep -n $PAT CHANGELOG.md | sed -n 2p | cut -d ":" -f 1)
-        L2=$(grep -n $PAT CHANGELOG.md | sed -n 3p | cut -d ":" -f 1)
+        L1=$(grep -n "$PAT" CHANGELOG.md | sed -n '2p' | cut -d ":" -f 1)
+        L2=$(grep -n "$PAT" CHANGELOG.md | sed -n '3p' | cut -d ":" -f 1)
         if [ -z "$L2" ]; then
             tail -n +$L1 CHANGELOG.md >> ${{ github.workflow }}-CHANGELOG.md
         else
-            awk "NR > $L1 && NR < $L2 - 1" CHANGELOG.md >> ${{ github.workflow }}-CHANGELOG.md
+            awk "NR > $L1 && NR < $((L2 - 1))" CHANGELOG.md >> ${{ github.workflow }}-CHANGELOG.md
         fi
     - name: Remove extra spaces
       run: |-
