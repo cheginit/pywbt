@@ -283,11 +283,10 @@ def whitebox_tools(
     Parameters
     ----------
     src_dir : str or Path
-        Path to the source directory containing input files. All files in this directory
-        will be copied to a temporary directory for processing by the WhiteboxTools.
-        Note that when using these files in ``arg_dict``, you should use the filenames
-        without the directory path since the internal working directory of the
-        WhitboxTools is set to the temporary directory where the files are copied.
+        Path to the source directory containing input files. This will be the working
+        directory for the WhiteboxTools session. The input files should be in this directory.
+        Thus, when using the files in this directory in ``arg_dict``, you must just use the
+        filenames without the directory path. Refer to the example in ``arg_dict``.
     arg_dict : dict
         A dictionary containing the tool names as keys and list of each
         tool's arguments as values. For example:
