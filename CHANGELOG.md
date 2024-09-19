@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - When an exception occurs during running WBT, propagate the exception and clean up
     before existing.
+- If for some reason simply running WBT fails, redownload the WBT executable and try
+    again. This is to avoid the situation where the WBT executable is corrupted or
+    not downloaded properly or is not compatible with the system platform.
 
 ## \[0.2.2\] - 2024-09-17
 
