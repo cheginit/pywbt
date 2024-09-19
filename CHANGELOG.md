@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - If for some reason simply running WBT fails, redownload the WBT executable and try
     again. This is to avoid the situation where the WBT executable is corrupted or
     not downloaded properly or is not compatible with the system platform.
+- Add two new helper function that can be used to get the list of available tools, their
+    respective descriptions and parameters: `list_tools` and `tool_parameters`. For better viewing
+    and querying the outputs of these two functions, it is recommended to use the `pandas` library.
+    For example, you can use `pd.Series(pywbt.list_tools())` to get a `pandas.Series` of the available
+    tools, and `pd.DataFrame(pywbt.tool_parameters("BreachDepressions"))` to get a `pandas.DataFrame`
+    of the parameters for the `BreachDepressions` tool.
 
 ## \[0.2.2\] - 2024-09-17
 

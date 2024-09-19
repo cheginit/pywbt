@@ -63,6 +63,13 @@ is the current working directory). To save only the specified output files and d
 intermediate files, use the `files_to_save` argument to specify the list of target outputs. This list
 should contain the filenames only specified without directory paths (as used in `arg_dict`).
 
+Also, there are two helper function that can be used to get the list of available tools, their
+respective descriptions and parameters: `list_tools` and `tool_parameters`. For better viewing
+and querying the outputs of these two functions, it is recommended to use the `pandas` library.
+For example, you can use `pd.Series(pywbt.list_tools())` to get a `pandas.Series` of the available
+tools, and `pd.DataFrame(pywbt.tool_parameters("BreachDepressions"))` to get a `pandas.DataFrame`
+of the parameters for the `BreachDepressions` tool.
+
 Here's an example demonstrating how to use PyWBT to run a WBT workflow:
 
 ```python
