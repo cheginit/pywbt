@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError, version
 
-from pywbt.pywbt import whitebox_tools
+from pywbt.pywbt import list_tools, tool_parameters, whitebox_tools
 
 try:
     __version__ = version("pywbt")
 except PackageNotFoundError:
     __version__ = "999"
 
-__all__ = ["whitebox_tools"]
+__all__ = ["whitebox_tools", "list_tools", "tool_parameters"]

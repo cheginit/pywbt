@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import platform
 import re
@@ -18,11 +19,14 @@ from typing import TYPE_CHECKING, Literal
 
 BASE_URL = "https://www.whiteboxgeo.com/WBT_{}/WhiteboxTools_{}.zip"
 
-__all__ = ["whitebox_tools"]
+__all__ = ["whitebox_tools", "list_tools", "tool_parameters"]
 
 if TYPE_CHECKING:
+    from subprocess import CompletedProcess
+
     Platform = Literal["win_amd64", "darwin_m_series", "darwin_amd64", "linux_amd64", "linux_musl"]
     System = Literal["Windows", "Darwin", "Linux"]
+    ExeName = Literal["whitebox_tools.exe", "whitebox_tools"]
 
 
 def _setup_logger() -> logging.Logger:
@@ -40,7 +44,7 @@ logger = _setup_logger()
 
 
 @lru_cache(maxsize=1)
-def _get_platform_suffix() -> tuple[System, Platform]:
+def _get_platform_suffix() -> tuple[System, Platform, ExeName]:
     """Determine the platform suffix for downloading WhiteboxTools."""
     system = platform.system()
     if system not in ("Windows", "Darwin", "Linux"):
@@ -52,7 +56,8 @@ def _get_platform_suffix() -> tuple[System, Platform]:
         suffix = "darwin_m_series" if platform.machine() == "arm64" else "darwin_amd64"
     else:
         suffix = "linux_musl" if "musl" in platform.libc_ver()[0].lower() else "linux_amd64"
-    return system, suffix
+    exe_name = "whitebox_tools.exe" if system == "Windows" else "whitebox_tools"
+    return system, suffix, exe_name
 
 
 def _extract_wbt(zip_path: Path, wbt_root: Path, temp_path: Path, system: System) -> None:
@@ -96,11 +101,10 @@ def _download_wbt(
     refresh_download: bool,
 ) -> str:
     """Download the WhiteboxTools executable for the current platform."""
-    system, platform_suffix = _get_platform_suffix()
+    system, platform_suffix, exe_name = _get_platform_suffix()
     url = BASE_URL.format(system, platform_suffix)
     wbt_root = Path(wbt_root)
 
-    exe_name = "whitebox_tools.exe" if system == "Windows" else "whitebox_tools"
     exe_path = wbt_root / exe_name
     if exe_path.exists() and not refresh_download:
         logger.info(f"Using existing WhiteboxTools executable: {exe_path}")
@@ -209,7 +213,7 @@ class _WBTSession:
         self.save_dir = save_dir
         self.version = version
         self.outputs = []
-        self.system, _ = _get_platform_suffix()
+        self.system, *_ = _get_platform_suffix()
 
     @staticmethod
     def _extract_outputs(wbt_args: dict[str, list[str]]) -> list[str]:
@@ -242,7 +246,7 @@ class _WBTSession:
         max_procs : int
             Maximum number of processes to use.
         """
-        exe_name = "whitebox_tools.exe" if self.system == "Windows" else "whitebox_tools"
+        _, _, exe_name = _get_platform_suffix()
         exe_path = Path(wbt_root) / exe_name
         self.outputs = self._extract_outputs(wbt_args)
         for tool_name, args in wbt_args.items():
@@ -382,3 +386,64 @@ def whitebox_tools(
 
     with _WBTSession(Path(src_dir), Path(save_dir), files_to_save, version) as wbt:
         wbt.run(arg_dict, wbt_root, compress_rasters, max_procs)
+
+
+def _run_wbt_cmd(
+    cmd: str, wbt_root: str | Path = "WBT", zip_path: str | Path | None = None
+) -> CompletedProcess[str]:
+    """Run WhiteboxTools command to list available tools and their options."""
+    logger.setLevel(logging.WARNING)
+    _ = _download_wbt(wbt_root, zip_path, False)
+    _, _, exe_name = _get_platform_suffix()
+    exe_path = Path(wbt_root) / exe_name
+    return subprocess.run([str(exe_path), cmd], capture_output=True, text=True, check=True)
+
+
+def list_tools(wbt_root: str | Path = "WBT", zip_path: str | Path | None = None) -> dict[str, str]:
+    """List the available WhiteboxTools commands.
+
+    Parameters
+    ----------
+    wbt_root : str or Path, optional
+        Path to the directory containing the WhiteboxTools executables
+        (default is ``"WBT"``).
+    zip_path : str or Path, optional
+        Path to the zip file containing the WhiteboxTools executables (default is ``None``).
+
+    Returns
+    -------
+    dict
+        A dictionary of WhiteboxTools commands and their descriptions. Can
+        be converted to a ``pandas.Series`` for easier viewing using
+        ``pd.Series(pywbt.list_tools())``.
+    """
+    result = _run_wbt_cmd("--listtools", wbt_root, zip_path)
+    tools = (t.split(":") for t in result.stdout.strip().split("\n")[1:] if t)
+    return {n: d.strip() for n, d in tools}
+
+
+def tool_parameters(
+    tool_name: str, wbt_root: str | Path = "WBT", zip_path: str | Path | None = None
+) -> list[dict[str, str]]:
+    """List the parameters for a WhiteboxTools command.
+
+    Parameters
+    ----------
+    tool_name : str
+        Name of the WhiteboxTools command.
+    wbt_root : str or Path, optional
+        Path to the directory containing the WhiteboxTools executables
+        (default is ``"WBT"``).
+    zip_path : str or Path, optional
+        Path to the zip file containing the WhiteboxTools executables (default is ``None``).
+
+    Returns
+    -------
+    list
+        A list of WhiteboxTools command parameters and their descriptions.
+        Can be converted to a ``pandas.DataFrame`` for easier viewing. For example,
+        to get parameters of ``Aspect`` tool, use
+        ``pd.DataFrame(pywbt.tool_parameters("Aspect"))``.
+    """
+    result = _run_wbt_cmd(f"--toolparameters={tool_name}", wbt_root, zip_path)
+    return json.loads(result.stdout)["parameters"]
