@@ -117,3 +117,10 @@ def test_wrong_platform(wrong_wbt_zipfile: str, wbt_args: dict[str, list[str]]) 
             zip_path=f"{tmpdir}/{wrong_wbt_zipfile}",
         )
         assert_results(f"{tmpdir}/streams.tif", 0.1243)
+
+
+def test_tools() -> None:
+    tools = pywbt.list_tools()
+    assert "BreachDepressions" in tools
+    for t in tools:
+        assert isinstance(pywbt.tool_parameters(t), list)
