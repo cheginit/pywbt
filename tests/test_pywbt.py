@@ -102,3 +102,18 @@ def test_wbt_error(wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
                 wbt_root=f"{tmpdir}/WBT",
                 zip_path=f"tests/wbt_zip/{wbt_zipfile}",
             )
+
+
+def test_wrong_platform(wrong_wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
+    with tempfile.TemporaryDirectory(prefix="test_", dir=".") as tmpdir:
+        shutil.copy("tests/dem.tif", tmpdir)
+        shutil.copy(f"tests/wbt_zip/{wrong_wbt_zipfile}", f"{tmpdir}/{wrong_wbt_zipfile}")
+        pywbt.whitebox_tools(
+            tmpdir,
+            wbt_args,
+            ["streams.tif"],
+            save_dir=tmpdir,
+            wbt_root=f"{tmpdir}/WBT",
+            zip_path=f"{tmpdir}/{wrong_wbt_zipfile}",
+        )
+        assert_results(f"{tmpdir}/streams.tif", 0.1243)
