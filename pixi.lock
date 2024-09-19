@@ -1009,7 +1009,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distlib-0.3.8-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/filelock-3.16.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/identify-2.6.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h3ed4263_7.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-19.1.0-ha82da77_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libexpat-2.6.3-hf9b8971_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libffi-3.4.2-h3422bc3_5.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libsqlite-3.46.1-hc14010f_0.conda
@@ -1454,7 +1454,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/bzip2-1.0.8-h99b78c6_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ca-certificates-2024.8.30-hf0a4a13_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/icu-75.1-hfee45f7_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h3ed4263_7.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-19.1.0-ha82da77_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libexpat-2.6.3-hf9b8971_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libffi-3.4.2-h3422bc3_5.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libsqlite-3.46.1-hc14010f_0.conda
@@ -3022,22 +3022,6 @@ packages:
 - kind: conda
   name: libcxx
   version: 18.1.8
-  build: h3ed4263_7
-  build_number: 7
-  subdir: osx-arm64
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h3ed4263_7.conda
-  sha256: 15b4abaa249f0965ce42aeb4a1a2b1b5df9a1f402e7c5bd8156272fd6cad2878
-  md5: e0e7d9a2ec0f9509ffdfd5f48da522fb
-  depends:
-  - __osx >=11.0
-  license: Apache-2.0 WITH LLVM-exception
-  license_family: Apache
-  purls: []
-  size: 436921
-  timestamp: 1725403628507
-- kind: conda
-  name: libcxx
-  version: 18.1.8
   build: hd876a4e_7
   build_number: 7
   subdir: osx-64
@@ -3051,6 +3035,21 @@ packages:
   purls: []
   size: 439306
   timestamp: 1725403678987
+- kind: conda
+  name: libcxx
+  version: 19.1.0
+  build: ha82da77_0
+  subdir: osx-arm64
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-19.1.0-ha82da77_0.conda
+  sha256: b71167d9b7c8e598b12bbdafefd0139e3c70c6eb258cbda3de3fb422d0098025
+  md5: a4c66c0d5b0f268fd27a956145004d27
+  depends:
+  - __osx >=11.0
+  license: Apache-2.0 WITH LLVM-exception
+  license_family: Apache
+  purls: []
+  size: 520766
+  timestamp: 1726782571130
 - kind: conda
   name: libexpat
   version: 2.6.3
@@ -5652,9 +5651,9 @@ packages:
   sha256: 31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725
 - kind: pypi
   name: pywbt
-  version: 0.2.3.dev7+g89057c1.d20240919
+  version: 0.2.3.dev13+g3f0d384.d20240919
   path: .
-  sha256: 76122a8e13a2a18bd522f71baebaea13d139bf7fe7ac5125b96096c096d342ae
+  sha256: eccb9d2d4e6a98e7fb3bff544bb2280f77620cde604a2816cfcfc4cced0ea409
   requires_dist:
   - folium ; extra == 'dev'
   - geopandas>=1 ; extra == 'dev'
