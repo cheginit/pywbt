@@ -209,7 +209,7 @@ lint.isort.required-imports = [
 lint.pydocstyle.convention = "numpy"
 
 [tool.codespell]
-skip = "__pycache__,_build,.mypy_cache,.git,./htmlcov,cache,pixi.lock,**.ipynb"
+skip = "__pycache__,_build,.mypy_cache,.git,./htmlcov,cache,pixi.lock,**.ipynb,**WBT"
 ignore-words-list = "gage,gages,paramss,trough"
 
 [tool.pytest.ini_options]
