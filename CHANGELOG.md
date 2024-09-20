@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## \[Unreleased\]
 
+## \[0.2.3\] - 2024-09-19
+
 ### Added
 
 - When an exception occurs during running WBT, propagate the exception and clean up
