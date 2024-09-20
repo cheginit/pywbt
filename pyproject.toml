@@ -41,6 +41,7 @@ optional-dependencies.dev = [
   "ipywidgets",
   "mapclassify",
   "matplotlib",
+  "pandas>=2.2.2,<3",
   "planetary-computer",
   "pystac-client",
   "rasterio",
