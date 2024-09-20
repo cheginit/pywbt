@@ -5651,9 +5651,9 @@ packages:
   sha256: 31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725
 - kind: pypi
   name: pywbt
-  version: 0.2.3.dev13+g3f0d384.d20240919
+  version: 0.2.3.dev20+g1d6e2bb.d20240920
   path: .
-  sha256: eccb9d2d4e6a98e7fb3bff544bb2280f77620cde604a2816cfcfc4cced0ea409
+  sha256: bfb0c833039f199996637307ff91eb3677f0f3430e6c867885c4a855773f133d
   requires_dist:
   - folium ; extra == 'dev'
   - geopandas>=1 ; extra == 'dev'
@@ -5661,6 +5661,7 @@ packages:
   - ipywidgets ; extra == 'dev'
   - mapclassify ; extra == 'dev'
   - matplotlib ; extra == 'dev'
+  - pandas<3,>=2.2.2 ; extra == 'dev'
   - planetary-computer ; extra == 'dev'
   - pystac-client ; extra == 'dev'
   - rasterio ; extra == 'dev'
