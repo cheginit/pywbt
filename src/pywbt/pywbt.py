@@ -220,9 +220,7 @@ class _WBTSession:
         """Extract output filenames from WhiteboxTools arguments."""
         outputs = []
         for args in wbt_args.values():
-            outputs.extend(
-                arg.split("=")[1] for arg in args if arg.startswith(("-o=", "--output="))
-            )
+            outputs.extend(arg.split("=")[1] for arg in args if arg.startswith(("-o=", "--output")))
         return outputs
 
     def run(
@@ -259,18 +257,16 @@ class _WBTSession:
         if self.save_dir != self.src_dir:
             self.save_dir.mkdir(parents=True, exist_ok=True)
             if self.files_to_save is not None:
-                for file in self.outputs:
+                for file in self.files_to_save:
                     source = self.src_dir / file
                     if not source.exists():
                         logger.exception(f"Output file to save {source} not found")
                         raise FileNotFoundError(f"Output file to save {source} not found")
                     destination = Path(self.save_dir, file)
-                    if file in self.files_to_save:
-                        shutil.move(source, destination)
-                        logger.info(f"Moved output file {source} to {destination}")
-                    else:
-                        source.unlink()
-                        logger.info(f"Deleted intermediate file {source}")
+                    shutil.move(source, destination)
+                    logger.info(f"Moved output file {source} to {destination}")
+                _ = [(self.src_dir / f).unlink(missing_ok=True) for f in self.outputs]
+                logger.info("Deleted remaining intermediate files.")
             else:
                 for file in self.outputs:
                     shutil.move(self.src_dir / file, self.save_dir)
