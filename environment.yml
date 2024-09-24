@@ -5,7 +5,7 @@ channels:
 dependencies:
 - python >=3.11
 
-- pywbt >=0.2.0
+- pywbt >=0.2.4
 
 # Deps for examples
 - folium
@@ -15,8 +15,5 @@ dependencies:
 - mapclassify
 - matplotlib-base
 - planetary-computer
-- pyogrio
 - pystac-client
-- rasterio
 - rioxarray
-- shapely >=2
