@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError, version
 
-from pywbt.pywbt import list_tools, tool_parameters, whitebox_tools
 from pywbt import dem_utils
+from pywbt.pywbt import list_tools, tool_parameters, whitebox_tools
 
 try:
     __version__ = version("pywbt")
