@@ -1,4 +1,4 @@
-"""Utility functions for the examples."""
+"""Utility functions for getting and processing Digital Elevation Models (DEMs)."""
 
 from __future__ import annotations
 
@@ -7,31 +7,55 @@ from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from pathlib import Path
 
-    import xarray as xr
     import geopandas as gpd
+    import xarray as xr
+
+
+__all__ = ["get_nasadem", "get_3dep", "tif_to_da", "tif_to_gdf"]
+
+
+class DependencyError(ImportError):
+    """Raised when a required dependency is not found."""
+
+    def __init__(self) -> None:
+        self.message = "\n".join(
+            (
+                "The `dem_utils` module has additional dependencies that are not installed.",
+                "Please install them using:",
+                "`pip install 'geopandas>=1' planetary-computer pystac-client rioxarray`",
+                "or:",
+                "`micromamba install -c conda-forge 'geopandas-base>=1' planetary_computer pystac_client rioxarray`",
+            )
+        )
+        super().__init__(self.message)
+
+    def __str__(self) -> str:
+        return self.message
 
 
 def get_nasadem(
-    bbox: tuple[float, float, float, float], tiff_path: str | Path, to_utm: bool = False
+    bbox: tuple[float, float, float, float], tif_path: str | Path, to_utm: bool = False
 ) -> None:
-    """Download a Digital Elevation Model (DEM) for a given bounding box from NASADEM.
+    """Get DEM for a given bounding box from NASADEM.
 
     Parameters
     ----------
     bbox : tuple
         Bounding box coordinates in the order (west, south, east, north) in decimal degrees.
-    tiff_path : str or pathlib.Path
-        Path to save the GeoTIFF file
+    tif_path : str or pathlib.Path
+        Path to save the obtained data as a GeoTIFF file.
     to_utm : bool, optional
         Reproject the DEM to UTM, by default False.
     """
-    import geopandas as gpd
-    import planetary_computer
-    import pystac_client
-    import rioxarray
-    import rioxarray.merge as rxr_merge
-    import shapely
-
+    try:
+        import geopandas as gpd
+        import planetary_computer
+        import pystac_client
+        import rioxarray
+        import rioxarray.merge as rxr_merge
+        import shapely
+    except ImportError as e:
+        raise DependencyError from e
 
     bbox_buff = bbox_utm = bbox
     utm = 4326
@@ -56,12 +80,12 @@ def get_nasadem(
         dem = dem.rio.reproject(utm).fillna(dem.rio.nodata).rio.clip_box(*bbox_utm)
     dem.attrs.update({"units": "meters", "vertical_datum": "EGM96"})
     dem.name = "elevation"
-    dem.astype("int16").rio.to_raster(tiff_path)
+    dem.astype("int16").rio.to_raster(tif_path)
 
 
 def get_3dep(
     bbox: tuple[float, float, float, float],
-    tiff_path: str | Path,
+    tif_path: str | Path,
     resolution: int = 10,
     to_5070: bool = False,
 ) -> None:
@@ -70,19 +94,22 @@ def get_3dep(
     Parameters
     ----------
     bbox : tuple
-        Bounding box coordinates in the order (west, south, east, north) in decimal degrees.
-    tiff_path : str or pathlib.Path
-        Path to save the GeoTIFF file.
+        Bounding box coordinates in the order (west, south, east, north)
+        in decimal degrees.
+    tif_path : str or pathlib.Path
+        Path to save the obtained data as a GeoTIFF file.
     resolution : int, optional
         Resolution of the DEM in meters, by default 10.
     to_5070 : bool, optional
         Reproject the DEM to EPGS:5070, by default False.
     """
-    import geopandas as gpd
-    import numpy as np
-    import rioxarray
-    import shapely
-
+    try:
+        import geopandas as gpd
+        import numpy as np
+        import rioxarray
+        import shapely
+    except ImportError as e:
+        raise DependencyError from e
 
     base_url = "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation"
     url = {
@@ -108,41 +135,45 @@ def get_3dep(
         dem = dem.rio.reproject(crs_proj).rio.clip_box(*bbox_proj)
     dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})
     dem.name = "elevation"
-    dem.rio.to_raster(tiff_path)
+    dem.rio.to_raster(tif_path)
 
 
 def tif_to_da(
-    tiff_path: str | Path,
+    tif_path: str | Path,
     dtype: str | None = None,
     name: str | None = None,
     long_name: str | None = None,
     nodata: float | None = None,
 ) -> xr.DataArray:
-    """Read a GeoTIFF file into an xarray DataArray.
+    """Read a GeoTIFF file with a single band into an xarray DataArray.
 
     Parameters
     ----------
-    tiff_path : str or pathlib.Path
-        Path to the GeoTIFF file.
+    tif_path : str or pathlib.Path
+        Path to the GeoTIFF file with a single band.
     dtype : str, optional
-        Data type to cast the data to, e.g. ``int32``, by default None.
+        Data type to cast the data to, e.g. ``int32``, by default ``None``,
+        i.e. use the data type from the GeoTIFF.
     name : str, optional
-        Name to assign to the DataArray, by default None.
+        Name to assign to the ``xarray.DataArray``, by default ``None``.
     long_name : str, optional
-        Long name to assign to the DataArray, by default None.
+        Long name to assign to the ``xarray.DataArray``, by default ``None``.
     nodata : int or float, optional
-        Value to use as nodata, by default None, i.e. use the nodata value from the GeoTIFF.
+        Value to use as ``da.rio.nodata``, by default ``None``, i.e.
+        use the ``da.rio.nodata`` value from the GeoTIFF.
 
     Returns
     -------
     xarray.DataArray
         DataArray containing the GeoTIFF data.
     """
-    import numpy as np
-    import rioxarray
+    try:
+        import numpy as np
+        import rioxarray
+    except ImportError as e:
+        raise DependencyError from e
 
-
-    ds = cast("xr.DataArray", rioxarray.open_rasterio(tiff_path).squeeze().load())
+    ds = cast("xr.DataArray", rioxarray.open_rasterio(tif_path).squeeze().load())
     if nodata is not None:
         ds = ds.rio.write_nodata(nodata)
     if dtype:
@@ -158,17 +189,18 @@ def tif_to_da(
     return ds
 
 
-def tiff_to_gdf(
-    tiff_path: str | Path, dtype: str, feat_name: str, connectivity: int = 8
+def tif_to_gdf(
+    tif_path: str | Path, dtype: str, feat_name: str, connectivity: int = 8
 ) -> gpd.GeoDataFrame:
     """Convert a GeoTIFF to a GeoDataFrame.
 
     Parameters
     ----------
-    tiff_path : str or pathlib.Path
+    tif_path : str or pathlib.Path
         Path to the GeoTIFF file. The file must contain a single band.
     dtype : str
-        String representation of the data type to use for the feature values, e.g. ``int32``.
+        String representation of the data type to use for the feature
+        values, e.g. ``int32``.
     feat_name : str
         Name to assign to the feature values column.
     connectivity : int, optional
@@ -180,13 +212,15 @@ def tiff_to_gdf(
     geopandas.GeoDataFrame
         GeoDataFrame containing the features.
     """
-    import rasterio
-    from rasterio import features
-    import geopandas as gpd
-    import numpy as np
+    try:
+        import geopandas as gpd
+        import numpy as np
+        import rasterio
+        from rasterio import features
+    except ImportError as e:
+        raise DependencyError from e
 
-
-    with rasterio.open(tiff_path) as src:
+    with rasterio.open(tif_path) as src:
         data = src.read(1).astype(dtype)
         nodata = np.nan if src.nodata is None else src.nodata
         feats_gen = features.shapes(
