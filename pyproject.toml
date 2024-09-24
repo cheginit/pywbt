@@ -34,6 +34,12 @@ classifiers = [
 dynamic = [
   "version",
 ]
+optional-dependencies.dem = [
+  "geopandas>=1",
+  "planetary-computer",
+  "pystac-client",
+  "rioxarray",
+]
 optional-dependencies.dev = [
   "folium",
   "geopandas>=1",
@@ -41,12 +47,9 @@ optional-dependencies.dev = [
   "ipywidgets",
   "mapclassify",
   "matplotlib",
-  "pandas>=2.2.2,<3",
   "planetary-computer",
   "pystac-client",
-  "rasterio",
   "rioxarray",
-  "shapely>=2",
 ]
 optional-dependencies.docs = [
   "black",
@@ -65,7 +68,7 @@ optional-dependencies.test = [
   "coverage[toml]",
   "pytest-cov",
   "pytest-sugar",
-  "rasterio",
+  "pywbt[dem]",
 ]
 urls.Changelog = "https://github.com/hyriver/pywbt/blob/main/CHANGELOG.md"
 urls.CI = "https://github.com/hyriver/pywbt/actions"
@@ -299,11 +302,11 @@ python = "~=3.9.0"
 python = "~=3.12.0"
 
 [tool.pixi.environments]
-test39 = { features = [ "test", "py39" ] }
-test312 = { features = [ "test", "py312" ] }
+test39 = { features = [ "test", "dem", "py39" ] }
+test312 = { features = [ "test", "dem", "py312" ] }
 lint = { features = [ "lint", "py312" ], no-default-feature = true }
-typecheck = { features = [ "typecheck", "py312" ] }
-dev = { features = [ "dev", "test", "py312" ] }
+typecheck = { features = [ "typecheck", "dem", "py312" ] }
+dev = { features = [ "dev", "test", "dem", "py312" ] }
 docs = { features = [ "docs", "py312" ], no-default-feature = true }
 
 [tool.pixi.feature.test.tasks]
