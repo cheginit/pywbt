@@ -230,8 +230,7 @@ class _WBTSession:
         compress_rasters: bool,
         max_procs: int,
     ) -> None:
-        """
-        Run WhiteboxTools operations.
+        """Run WhiteboxTools operations.
 
         Parameters
         ----------
@@ -378,7 +377,7 @@ def whitebox_tools(
         raise ValueError("arg_dict must be a dict of str keys and list or tuple values.")
 
     if not (files_to_save is None or isinstance(files_to_save, (list, tuple))):
-        raise TypeError("files_to_save must be a list or tuple of strings.")
+        raise TypeError("files_to_save must be None, a list, or tuple of strings.")
 
     with _WBTSession(Path(src_dir), Path(save_dir), files_to_save, version) as wbt:
         wbt.run(arg_dict, wbt_root, compress_rasters, max_procs)
