@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## \[Unreleased\]
 
+## \[0.2.4\] - 2024-09-24
+
+### Added
+
+- Add a new module called `dem_utils` that contains utilities for downloading
+    and reading DEM data from 3DEP and NASADEM. Note that the module has some
+    additional dependencies that need to be installed. To install these
+    dependencies, use:
+
+```bash
+pip install pywbt[dem]
+```
+
+or using `micromamba`:
+
+```bash
+micromamba install -c conda-forge pywbt 'geopandas-base>=1' planetary-computer pystac-client rioxarray
+```
+
 ## \[0.2.3\] - 2024-09-19
 
 ### Added
