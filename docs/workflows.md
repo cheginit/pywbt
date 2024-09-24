@@ -51,3 +51,13 @@ Contributing to this list is highly appreciated. You can just click on the `Edit
     "FindMainStem": ["--d8_pntr=fdir.tif", "--streams=d8accum.tif", "-o=mainstem.tif"],
 }
 ```
+
+## Burn Streams and Flow Direction
+
+```py
+{
+    "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
+    "FillBurn": ["--dem=dem_corr.tif", f"--streams=stream.shp", "-o=dem_burn.tif"],
+    "D8Pointer": ["-i=dem_burn.tif", "--esri_pntr", "-o=d8.tif"],
+}
+```
