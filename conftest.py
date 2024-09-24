@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import builtins
+import importlib
 import platform
+from typing import Any, Callable
 
 import pytest
 
@@ -47,3 +50,19 @@ def wrong_wbt_zipfile() -> str:
     else:
         suffix = "win_amd64"
     return base_name.format(suffix)
+
+
+@pytest.fixture
+def block_optional_imports(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
+    def _block(*names: str) -> None:
+        original_import = builtins.__import__
+
+        def mocked_import(name: str, *args: Any, **kwargs: Any):
+            if name in names:
+                raise ImportError(f"Import of '{name}' is blocked for testing")
+            return original_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", mocked_import)
+        monkeypatch.setattr(importlib, "import_module", mocked_import)
+
+    return _block
