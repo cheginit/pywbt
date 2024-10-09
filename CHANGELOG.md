@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## \[Unreleased\]
 
+### Fixed
+
+- Automatically add auxiliary files of Shapefile when they exist in `arg_dict`.
+    This ensures that the auxiliary files are also stored to `save_dir` when
+    `files_to_save` is provided.
+
 ## \[0.2.4\] - 2024-09-24
 
 ### Added
