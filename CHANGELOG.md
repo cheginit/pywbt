@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## \[0.2.6\] - 2024-10-09
+
+### Fixed
+
+- Fix a bug in extracting WBT executable from the zip file. The bug impacted
+    mostly users who run PyWBT on cluster environments where the `tempfile`
+    modules uses system's temporary directory which in most cases is not
+    reliable. The fix is to use the `tempfile.TemporaryDirectory` context
+    manager to create a temporary directory in the current working directory.
+
 ## \[0.2.5\] - 2024-10-08
 
 ### Fixed
