@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import builtins
+import contextlib
 import importlib
 import platform
+import shutil
 import tempfile
 from typing import Any, Callable
 
@@ -69,10 +71,12 @@ def block_optional_imports(monkeypatch: pytest.MonkeyPatch) -> Callable[..., Non
     return _block
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def temp_dir():
-    with tempfile.TemporaryDirectory(prefix="test_", dir=".", ignore_cleanup_errors=True) as tmpdir:
-        yield tmpdir
+    temp_dir = tempfile.mkdtemp(prefix="test_", dir=".")
+    yield temp_dir
+    with contextlib.suppress(PermissionError):
+        shutil.rmtree(temp_dir)
 
 
 @pytest.fixture
