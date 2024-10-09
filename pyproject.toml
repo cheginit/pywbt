@@ -70,10 +70,10 @@ optional-dependencies.test = [
   "pytest-sugar",
   "pywbt[dem]",
 ]
-urls.Changelog = "https://github.com/hyriver/pywbt/blob/main/CHANGELOG.md"
-urls.CI = "https://github.com/hyriver/pywbt/actions"
-urls.Homepage = "https://github.com/hyriver/pywbt"
-urls.Issues = "https://github.com/hyriver/pywbt/issues"
+urls.Changelog = "https://github.com/cheginit/pywbt/blob/main/CHANGELOG.md"
+urls.CI = "https://github.com/cheginit/pywbt/actions"
+urls.Homepage = "https://github.com/cheginit/pywbt"
+urls.Issues = "https://github.com/cheginit/pywbt/issues"
 
 [tool.hatch.version]
 source = "vcs"
