@@ -112,3 +112,4 @@ results
 .copilot-instructions.md
 junit.xml
 .coverage
+pixi.lock
