@@ -210,18 +210,32 @@ class _WBTSession:
     ) -> None:
         self.src_dir = src_dir
         self.files_to_save = files_to_save
+        if self.files_to_save is not None:
+            self.files_to_save = list(self.files_to_save)
+            # add .dbf, .prj, .shx files for Shapefile outputs
+            for file in self.files_to_save:
+                if file.endswith(".shp"):
+                    self.files_to_save.extend(
+                        [file, file[:-4] + ".dbf", file[:-4] + ".prj", file[:-4] + ".shx"]
+                    )
+
         self.save_dir = save_dir
         self.version = version
-        self.outputs = []
+        self.outputs = {}
         self.system, *_ = _get_platform_suffix()
 
     @staticmethod
-    def _extract_outputs(wbt_args: dict[str, list[str]]) -> list[str]:
+    def _extract_outputs(wbt_args: dict[str, list[str]]) -> set[str]:
         """Extract output filenames from WhiteboxTools arguments."""
         outputs = []
         for args in wbt_args.values():
-            outputs.extend(arg.split("=")[1] for arg in args if arg.startswith(("-o=", "--output")))
-        return outputs
+            output = [arg.split("=")[1] for arg in args if arg.startswith(("-o=", "--output"))]
+            # add .dbf, .prj, .shx files for Shapefile outputs
+            for out in output:
+                if out.endswith(".shp"):
+                    output.extend([out, out[:-4] + ".dbf", out[:-4] + ".prj", out[:-4] + ".shx"])
+            outputs.extend(output)
+        return set(outputs)
 
     def run(
         self,
@@ -262,6 +276,7 @@ class _WBTSession:
                         logger.exception(f"Output file to save {source} not found")
                         raise FileNotFoundError(f"Output file to save {source} not found")
                     destination = Path(self.save_dir, file)
+                    destination.unlink(missing_ok=True)
                     shutil.move(source, destination)
                     logger.info(f"Moved output file {source} to {destination}")
                 _ = [(self.src_dir / f).unlink(missing_ok=True) for f in self.outputs]
