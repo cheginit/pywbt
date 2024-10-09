@@ -286,6 +286,7 @@ matplotlib-base = "*"
 planetary-computer = "*"
 pystac-client = "*"
 rioxarray = "*"
+pytest = "*"
 
 [tool.pixi.feature.lint.dependencies]
 pre-commit = "*"
