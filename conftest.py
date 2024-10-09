@@ -5,6 +5,7 @@ from __future__ import annotations
 import builtins
 import importlib
 import platform
+import tempfile
 from typing import Any, Callable
 
 import pytest
@@ -66,3 +67,18 @@ def block_optional_imports(monkeypatch: pytest.MonkeyPatch) -> Callable[..., Non
         monkeypatch.setattr(importlib, "import_module", mocked_import)
 
     return _block
+
+
+@pytest.fixture(autouse=True)
+def temp_dir():
+    with tempfile.TemporaryDirectory(prefix="test_", dir=".", ignore_cleanup_errors=True) as tmpdir:
+        yield tmpdir
+
+
+@pytest.fixture
+def wbt_args() -> dict[str, list[str]]:
+    return {
+        "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
+        "D8FlowAccumulation": ["-i=dem_corr.tif", "-o=d8accum.tif"],
+        "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
+    }
