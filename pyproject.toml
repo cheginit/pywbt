@@ -40,17 +40,6 @@ optional-dependencies.dem = [
   "pystac-client",
   "rioxarray",
 ]
-optional-dependencies.dev = [
-  "folium",
-  "geopandas>=1",
-  "ipykernel",
-  "ipywidgets",
-  "mapclassify",
-  "matplotlib",
-  "planetary-computer",
-  "pystac-client",
-  "rioxarray",
-]
 optional-dependencies.docs = [
   "black",
   "mdx-truly-sane-lists>=1.3",
@@ -58,17 +47,6 @@ optional-dependencies.docs = [
   "mkdocs-jupyter",
   "mkdocs-material>=9.5.20",
   "mkdocstrings-python",
-]
-optional-dependencies.lint = [
-  "codespell",
-  "pre-commit",
-  "tomli",
-]
-optional-dependencies.test = [
-  "coverage[toml]",
-  "pytest-cov",
-  "pytest-sugar",
-  "pywbt[dem]",
 ]
 urls.Changelog = "https://github.com/cheginit/pywbt/blob/main/CHANGELOG.md"
 urls.CI = "https://github.com/cheginit/pywbt/actions"
@@ -290,26 +268,45 @@ platforms = [ "linux-64", "osx-64", "osx-arm64", "win-64" ]
 pywbt = { path = ".", editable = true }
 
 [tool.pixi.feature.test.dependencies]
-proj = "*"
+coverage = "*"
+pytest-cov = "*"
+pytest-sugar = "*"
+geopandas-base = ">=1"
+planetary-computer = "*"
+pystac-client = "*"
+rioxarray = "*"
+
+[tool.pixi.feature.dev.dependencies]
+folium = "*"
+geopandas-base = ">=1"
+ipykernel = "*"
+ipywidgets = "*"
+mapclassify = "*"
+matplotlib-base = "*"
+planetary-computer = "*"
+pystac-client = "*"
+rioxarray = "*"
 
 [tool.pixi.feature.lint.dependencies]
 pre-commit = "*"
+codespell = "*"
 
 [tool.pixi.feature.typecheck.dependencies]
 pyright = "*"
 
 [tool.pixi.feature.py39.dependencies]
 python = "~=3.9.0"
+tomli = "*"
 
 [tool.pixi.feature.py312.dependencies]
 python = "~=3.12.0"
 
 [tool.pixi.environments]
-test39 = { features = [ "test", "dem", "py39" ] }
-test312 = { features = [ "test", "dem", "py312" ] }
+test39 = { features = [ "test", "py39" ] }
+test312 = { features = [ "test", "py312" ] }
 lint = { features = [ "lint", "py312" ], no-default-feature = true }
-typecheck = { features = [ "typecheck", "dem", "py312" ] }
-dev = { features = [ "dev", "test", "dem", "py312" ] }
+typecheck = { features = [ "typecheck", "py312" ] }
+dev = { features = [ "dev", "py312" ] }
 docs = { features = [ "docs", "py312" ], no-default-feature = true }
 
 [tool.pixi.feature.test.tasks]
