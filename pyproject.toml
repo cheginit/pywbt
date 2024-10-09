@@ -289,6 +289,9 @@ platforms = [ "linux-64", "osx-64", "osx-arm64", "win-64" ]
 [tool.pixi.pypi-dependencies]
 pywbt = { path = ".", editable = true }
 
+[tool.pixi.feature.test.dependencies]
+proj = "*"
+
 [tool.pixi.feature.lint.dependencies]
 pre-commit = "*"
 
