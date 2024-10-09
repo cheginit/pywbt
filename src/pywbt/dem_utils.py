@@ -51,7 +51,7 @@ def get_nasadem(
         import geopandas as gpd
         import planetary_computer
         import pystac_client
-        import rioxarray
+        import rioxarray as rxr
         import rioxarray.merge as rxr_merge
         import shapely
     except ImportError as e:
@@ -74,13 +74,14 @@ def get_nasadem(
         for item in catalog.search(collections=["nasadem"], bbox=bbox_buff).items()
     )
     dem = rxr_merge.merge_arrays(
-        [rioxarray.open_rasterio(href).squeeze(drop=True) for href in signed_asset]  # pyright: ignore[reportArgumentType]
+        [rxr.open_rasterio(href).squeeze(drop=True) for href in signed_asset]  # pyright: ignore[reportArgumentType]
     )
     if to_utm:
         dem = dem.rio.reproject(utm).fillna(dem.rio.nodata).rio.clip_box(*bbox_utm)
     dem.attrs.update({"units": "meters", "vertical_datum": "EGM96"})
     dem.name = "elevation"
     dem.astype("int16").rio.to_raster(tif_path)
+    dem.close()
 
 
 def get_3dep(
@@ -106,7 +107,7 @@ def get_3dep(
     try:
         import geopandas as gpd
         import numpy as np
-        import rioxarray
+        import rioxarray as rxr
         import shapely
     except ImportError as e:
         raise DependencyError from e
@@ -128,7 +129,7 @@ def get_3dep(
         buff_size = 20
         bbox_buff = gdf.to_crs(crs_proj).buffer(buff_size * resolution).to_crs(4326).total_bounds
 
-    dem = cast("xr.DataArray", rioxarray.open_rasterio(url[resolution]).squeeze())
+    dem = cast("xr.DataArray", rxr.open_rasterio(url[resolution]).squeeze(drop=True))
     dem = dem.rio.clip_box(*bbox_buff)
     dem = dem.where(dem > dem.rio.nodata, drop=False).rio.write_nodata(np.nan)
     if to_5070:
@@ -136,6 +137,7 @@ def get_3dep(
     dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})
     dem.name = "elevation"
     dem.rio.to_raster(tif_path)
+    dem.close()
 
 
 def tif_to_da(
@@ -169,11 +171,13 @@ def tif_to_da(
     """
     try:
         import numpy as np
-        import rioxarray
+        import rioxarray as rxr
     except ImportError as e:
         raise DependencyError from e
 
-    ds = cast("xr.DataArray", rioxarray.open_rasterio(tif_path).squeeze().load())
+    ds = rxr.open_rasterio(tif_path).squeeze(drop=True).load()
+    ds.close()
+    ds = cast("xr.DataArray", ds)
     if nodata is not None:
         ds = ds.rio.write_nodata(nodata)
     if dtype is None:
