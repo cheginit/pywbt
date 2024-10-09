@@ -117,7 +117,7 @@ def _download_wbt(
 
     shutil.rmtree(wbt_root, ignore_errors=True)
 
-    with tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="wbt_", dir=".") as temp_dir:
         temp_path = Path(temp_dir)
         zip_path = temp_path / Path(url).name if zip_path is None else Path(zip_path)
         zip_path.parent.mkdir(parents=True, exist_ok=True)
