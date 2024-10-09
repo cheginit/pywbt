@@ -176,10 +176,10 @@ def tif_to_da(
     ds = cast("xr.DataArray", rioxarray.open_rasterio(tif_path).squeeze().load())
     if nodata is not None:
         ds = ds.rio.write_nodata(nodata)
-    if dtype:
-        ds = ds.astype(dtype)
-    else:
+    if dtype is None:
         dtype = str(ds.dtype)
+    else:
+        ds = ds.astype(dtype)
     if ds.rio.nodata is not None and np.issubdtype(dtype, np.floating):
         ds = ds.where(ds != ds.rio.nodata).rio.write_nodata(np.nan)
     if name:
