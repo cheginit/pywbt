@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## \[Unreleased\]
 
+### Added
+
+### Fixed
+
+### Changed
+
+## \[0.2.5\] - 2024-10-08
+
 ### Fixed
 
 - Automatically add auxiliary files of Shapefile when they exist in `arg_dict`.
