@@ -93,12 +93,12 @@ markdown_extensions:
 - mdx_truly_sane_lists
 
 extra:
-  homepage: https://cheginit.github.io
+  homepage: https://pywbt.readthedocs.io
   social:
   - icon: fontawesome/brands/twitter
     link: https://twitter.com/_taher_
   - icon: fontawesome/brands/linkedin
-    link: https://www.linkedin.com/tchegini
+    link: https://www.linkedin.com/in/tchegini
   - icon: fontawesome/brands/github
     link: https://github.com/cheginit
 
