@@ -8,6 +8,7 @@
 [![codecov](https://codecov.io/gh/cheginit/pywbt/graph/badge.svg?token=U2638J9WKM)](https://codecov.io/gh/cheginit/pywbt)
 [![CI](https://github.com/cheginit/pywbt/actions/workflows/test.yml/badge.svg)](https://github.com/cheginit/pywbt/actions/workflows/test.yml)
 [![Documentation Status](https://readthedocs.org/projects/pywbt/badge/?version=latest)](https://pywbt.readthedocs.io/latest/?badge=latest)
+[![Downloads](https://static.pepy.tech/badge/pywbt)](https://pepy.tech/project/pywbt)
 
 ## Overview
 
