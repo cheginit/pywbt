@@ -26,6 +26,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering",
   "Topic :: Scientific/Engineering :: GIS",
   "Topic :: Scientific/Engineering :: Hydrology",
@@ -177,11 +178,6 @@ lint.extend-safe-fixes = [
   # absolute imports
   "TID252",
 ]
-lint.flake8-bugbear.extend-immutable-calls = [
-  "chr",
-  "typer.Argument",
-  "typer.Option",
-]
 lint.isort.known-first-party = [
   "pywbt",
 ]
@@ -236,7 +232,6 @@ omit = [
 
 [tool.pyright]
 exclude = [
-  ".nox/",
   "**/__pycache__",
   "**/__init__.py",
   "tests/",
@@ -302,13 +297,16 @@ tomli = "*"
 [tool.pixi.feature.py312.dependencies]
 python = "~=3.12.0"
 
+[tool.pixi.feature.py313.dependencies]
+python = "~=3.13.0"
+
 [tool.pixi.environments]
+dev = { features = [ "dev", "test", "py312" ] }
 test39 = { features = [ "test", "py39" ] }
 test312 = { features = [ "test", "py312" ] }
-lint = { features = [ "lint", "py312" ], no-default-feature = true }
-typecheck = { features = [ "typecheck", "py312" ] }
-dev = { features = [ "dev", "py312" ] }
-docs = { features = [ "docs", "py312" ], no-default-feature = true }
+typecheck = { features = [ "typecheck", "py313" ] }
+lint = { features = [ "lint", "py313" ], no-default-feature = true }
+docs = { features = [ "docs", "py313" ], no-default-feature = true }
 
 [tool.pixi.feature.test.tasks]
 test = "pytest"
