@@ -158,6 +158,22 @@ def test_tif_to_gdf(temp_dir: str, wbt_zipfile: str) -> None:
     assert basin_geo.area.idxmax() == 175
 
 
+def test_shp_out(temp_dir: str, wbt_zipfile: str) -> None:
+    wbt_args = {
+        "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
+        "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
+        "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"],
+        "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
+        "RasterToVectorLines" : ["-i=streams.tif", "-o=streams.shp"],
+    }
+    shutil.copy("tests/dem.tif", temp_dir)
+    pywbt.whitebox_tools(temp_dir, wbt_args, ["streams.shp"],
+        save_dir=temp_dir,
+        wbt_root=Path(temp_dir) / "WBT",
+        zip_path=Path(temp_dir) / wbt_zipfile,)
+    assert Path(temp_dir, "streams.shp").stat().st_size == 179412
+
+
 def test_optional_deps(block_optional_imports: Callable[..., None]) -> None:
     block_optional_imports("rioxarray", "geopandas", "shapely", "numpy", "rasterio")
     with pytest.raises(DependencyError):
