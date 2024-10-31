@@ -48,6 +48,7 @@ optional-dependencies.docs = [
   "mkdocs-jupyter",
   "mkdocs-material>=9.5.20",
   "mkdocstrings-python",
+  "mkdocs-macros-plugin",
 ]
 urls.Changelog = "https://github.com/cheginit/pywbt/blob/main/CHANGELOG.md"
 urls.CI = "https://github.com/cheginit/pywbt/actions"
