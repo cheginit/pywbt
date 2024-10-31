@@ -113,6 +113,8 @@ nav:
 - Release Notes: CHANGELOG.md
 - Contributing: CONTRIBUTING.md
 plugins:
+- macros:
+    module_name: docs/docs_macros
 - search
 - mkdocs-jupyter:
     include: ['*.ipynb']
