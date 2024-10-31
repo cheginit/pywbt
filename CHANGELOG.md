@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## \[0.2.7\] - 2024-10-31
+
+### Fixed
+
+- Fix an issue when a Shapefile exists as input or output in the `arg_dict`. The
+    issue would have caused an infinite loop when trying to copy the Shapefile
+    and its auxiliary files. ({{ issue(3) }})
+
 ## \[0.2.6\] - 2024-10-09
 
 ### Fixed
