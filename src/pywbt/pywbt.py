@@ -215,8 +215,9 @@ class _WBTSession:
             # add .dbf, .prj, .shx files for Shapefile outputs
             for file in self.files_to_save:
                 if file.endswith(".shp"):
+                    stem = file[:-4]
                     self.files_to_save.extend(
-                        [file, file[:-4] + ".dbf", file[:-4] + ".prj", file[:-4] + ".shx"]
+                        [f"{stem}.dbf", f"{stem}.prj", f"{stem}.shx"]
                     )
 
         self.save_dir = save_dir
@@ -233,7 +234,8 @@ class _WBTSession:
             # add .dbf, .prj, .shx files for Shapefile outputs
             for out in output:
                 if out.endswith(".shp"):
-                    output.extend([out, out[:-4] + ".dbf", out[:-4] + ".prj", out[:-4] + ".shx"])
+                    stem = out[:-4]
+                    output.extend([f"{stem}.dbf", f"{stem}.prj", f"{stem}.shx"])
             outputs.extend(output)
         return set(outputs)
 
