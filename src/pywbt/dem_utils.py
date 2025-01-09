@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -106,9 +107,10 @@ def get_3dep(
     """
     try:
         import geopandas as gpd
-        import numpy as np
-        import rioxarray as rxr
+        import rasterio
+        import rasterio.windows
         import shapely
+        from rasterio.warp import Resampling, calculate_default_transform, reproject
     except ImportError as e:
         raise DependencyError from e
 
@@ -125,19 +127,56 @@ def get_3dep(
     if to_5070:
         gdf = gpd.GeoSeries(shapely.box(*bbox), crs=4326)  # pyright: ignore[reportCallIssue]
         crs_proj = 5070
-        bbox_proj = gdf.to_crs(crs_proj).total_bounds
+        bbox_proj = tuple(gdf.to_crs(crs_proj).total_bounds)
         buff_size = 20
         bbox_buff = gdf.to_crs(crs_proj).buffer(buff_size * resolution).to_crs(4326).total_bounds
 
-    dem = cast("xr.DataArray", rxr.open_rasterio(url[resolution]).squeeze(drop=True))
-    dem = dem.rio.clip_box(*bbox_buff)
-    dem = dem.where(dem > dem.rio.nodata, drop=False).rio.write_nodata(np.nan)
+    def _clip_bbox(
+        file_in: str | Path, bbox: tuple[float, float, float, float], file_out: str | Path
+    ) -> None:
+        """Clip a GeoTIFF file to a bounding box."""
+        with rasterio.open(file_in) as src:
+            window = rasterio.windows.from_bounds(*bbox, transform=src.transform)
+            meta = src.meta.copy()
+            meta.update(
+                {
+                    "driver": "GTiff",
+                    "height": window.height,
+                    "width": window.width,
+                    "transform": rasterio.windows.transform(window, src.transform),
+                    "nodata": math.nan,
+                }
+            )
+            data = src.read(window=window)
+            data[data == src.nodata] = math.nan
+            with rasterio.open(file_out, "w", **meta) as dst:
+                dst.write(data)
+
+    _clip_bbox(url[resolution], bbox_buff, tif_path)
+
     if to_5070:
-        dem = dem.rio.reproject(crs_proj).rio.clip_box(*bbox_proj)
-    dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})
-    dem.name = "elevation"
-    dem.rio.to_raster(tif_path)
-    dem.close()
+        dst_crs = 5070
+        with rasterio.open(tif_path) as src:
+            transform, width, height = calculate_default_transform(
+                src.crs, dst_crs, src.width, src.height, *src.bounds
+            )
+            kwargs = src.meta.copy()
+            kwargs.update(
+                {"crs": dst_crs, "transform": transform, "width": width, "height": height}
+            )
+            tif_tmp = tif_path.with_suffix(".tmp.tif")
+            with rasterio.open(tif_tmp, "w", **kwargs) as dst:
+                reproject(
+                    source=rasterio.band(src, 1),
+                    destination=rasterio.band(dst, 1),
+                    src_transform=src.transform,
+                    src_crs=src.crs,
+                    dst_transform=transform,
+                    dst_crs=dst_crs,
+                    resampling=Resampling.nearest,
+                )
+        _clip_bbox(tif_tmp, bbox_proj, tif_path)
+        tif_tmp.unlink()
 
 
 def tif_to_da(

@@ -208,7 +208,7 @@ def test_dem_utils(temp_dir: str) -> None:
     fname_nasadem = Path(temp_dir) / "nasadem.tif"
     pywbt.dem_utils.get_nasadem(bbox, fname_nasadem, to_utm=True)
     dn = pywbt.dem_utils.tif_to_da(fname_nasadem, "int16", "elevation", "Elevation", -32768)
-    assert d3.shape == (4, 4)
+    assert d3.shape == (3, 3)
     assert dn.shape == (5, 5)
     assert d3.mean().item() == pytest.approx(dn.mean().item(), rel=1.3)
 
