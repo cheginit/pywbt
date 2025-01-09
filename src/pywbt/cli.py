@@ -1,23 +1,24 @@
 """Command-line interface for pywbt."""
-from .pywbt import whitebox_tools
-import sys
+
+from __future__ import annotations
+
 import argparse
+import sys
 from pathlib import Path
 
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
+from pywbt.pywbt import whitebox_tools
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run WhiteboxTools using a TOML configuration file.")
-    parser.add_argument(
-        "config_file",
-        type=Path,
-        help="Path to the TOML configuration file."
+    parser = argparse.ArgumentParser(
+        description="Run WhiteboxTools using a TOML configuration file.",
     )
+    if sys.version_info >= (3, 11):
+        import tomllib
+    else:
+        import tomli as tomllib
+
+    parser.add_argument("config_file", type=Path, help="Path to the TOML configuration file.")
     cfg = Path(parser.parse_args().config_file)
     if not cfg.exists():
         raise FileNotFoundError(f"File not found: {cfg}")
@@ -26,7 +27,7 @@ def main():
         with cfg.open("rb") as f:
             config = tomllib.load(f)
     except tomllib.TOMLDecodeError as e:
-        raise ValueError(f"Invalid TOML file: {e}")
+        raise ValueError(f"Invalid TOML file: {e}") from e
 
     src_dir = config.get("src_dir")
     arg_dict = config.get("arg_dict")
@@ -52,5 +53,5 @@ def main():
         zip_path=zip_path,
         refresh_download=refresh_download,
         max_procs=max_procs,
-        verbose=verbose
+        verbose=verbose,
     )
