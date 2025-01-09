@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import math
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 
     import geopandas as gpd
     import xarray as xr
+
+    Bbox = tuple[float, float, float, float]
 
 
 __all__ = ["get_3dep", "get_nasadem", "tif_to_da", "tif_to_gdf"]
@@ -34,9 +36,62 @@ class DependencyError(ImportError):
         return self.message
 
 
-def get_nasadem(
-    bbox: tuple[float, float, float, float], tif_path: str | Path, to_utm: bool = False
-) -> None:
+def _check_bbox(bbox: Bbox) -> None:
+    """Validate that bbox is in correct form."""
+    if (
+        not isinstance(bbox, Sequence)
+        or len(bbox) != 4
+        or not all(isinstance(x, (int, float)) for x in bbox)
+    ):
+        raise TypeError(
+            "`bbox` must be a tuple of form (west, south, east, north) in decimal degrees."
+        )
+
+
+def _bbox_buffer(bbox: Bbox, buffer: float, crs_proj: int) -> tuple[Bbox, Bbox]:
+    """Buffer the bounding box."""
+    try:
+        import shapely
+        from pyproj import Transformer
+    except ImportError as e:
+        raise DependencyError from e
+    transformer = Transformer.from_crs(4326, crs_proj, always_xy=True)
+    minx, miny = transformer.transform(bbox[0], bbox[1])
+    maxx, maxy = transformer.transform(bbox[2], bbox[3])
+    bbox_proj = (minx, miny, maxx, maxy)
+
+    bbox_buff = shapely.box(*bbox_proj).buffer(buffer).bounds
+    transformer = Transformer.from_crs(crs_proj, 4326, always_xy=True)
+    minx, miny = transformer.transform(bbox_buff[0], bbox_buff[1])
+    maxx, maxy = transformer.transform(bbox_buff[2], bbox_buff[3])
+    bbox_buff = (minx, miny, maxx, maxy)
+    return bbox_proj, bbox_buff
+
+
+def _estimate_utm(bbox: Bbox) -> int:
+    """Estimate UTM CRS based on bbox."""
+    try:
+        from pyproj.aoi import AreaOfInterest
+        from pyproj.database import query_utm_crs_info
+    except ImportError as e:
+        raise DependencyError from e
+
+    minx, miny, maxx, maxy = bbox
+    x_center = 0.5 * (minx + maxx)
+    y_center = 0.5 * (miny + maxy)
+    utm_list = query_utm_crs_info(
+        datum_name="WGS 84",
+        area_of_interest=AreaOfInterest(
+            west_lon_degree=x_center,
+            south_lat_degree=y_center,
+            east_lon_degree=x_center,
+            north_lat_degree=y_center,
+        ),
+    )
+    return int(utm_list[0].code)
+
+
+def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
     """Get DEM for a given bounding box from NASADEM.
 
     Parameters
@@ -49,23 +104,20 @@ def get_nasadem(
         Reproject the DEM to UTM, by default False.
     """
     try:
-        import geopandas as gpd
         import planetary_computer
         import pystac_client
         import rioxarray as rxr
         import rioxarray.merge as rxr_merge
-        import shapely
     except ImportError as e:
         raise DependencyError from e
 
+    _check_bbox(bbox)
     bbox_buff = bbox_utm = bbox
     utm = 4326
     if to_utm:
-        gdf = gpd.GeoSeries(shapely.box(*bbox), crs=4326)  # pyright: ignore[reportCallIssue]
-        utm = gdf.estimate_utm_crs()
-        bbox_utm = gdf.to_crs(utm).total_bounds
+        utm = _estimate_utm(bbox)
         buff_size, dem_res = 20, 30
-        bbox_buff = gdf.to_crs(utm).buffer(buff_size * dem_res).to_crs(4326).total_bounds
+        bbox_utm, bbox_buff = _bbox_buffer(bbox, buff_size * dem_res, utm)
     catalog = pystac_client.Client.open(
         "https://planetarycomputer.microsoft.com/api/stac/v1",
         modifier=planetary_computer.sign_inplace,
@@ -86,7 +138,7 @@ def get_nasadem(
 
 
 def get_3dep(
-    bbox: tuple[float, float, float, float],
+    bbox: Bbox,
     tif_path: str | Path,
     resolution: int = 10,
     to_5070: bool = False,
@@ -106,14 +158,12 @@ def get_3dep(
         Reproject the DEM to EPGS:5070, by default False.
     """
     try:
-        import geopandas as gpd
-        import rasterio
-        import rasterio.windows
-        import shapely
-        from rasterio.warp import Resampling, calculate_default_transform, reproject
+        import numpy as np
+        import rioxarray as rxr
     except ImportError as e:
         raise DependencyError from e
 
+    _check_bbox(bbox)
     base_url = "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation"
     url = {
         10: f"{base_url}/13/TIFF/USGS_Seamless_DEM_13.vrt",
@@ -125,58 +175,19 @@ def get_3dep(
     bbox_buff = bbox_proj = bbox
     crs_proj = 4326
     if to_5070:
-        gdf = gpd.GeoSeries(shapely.box(*bbox), crs=4326)  # pyright: ignore[reportCallIssue]
         crs_proj = 5070
-        bbox_proj = tuple(gdf.to_crs(crs_proj).total_bounds)
         buff_size = 20
-        bbox_buff = gdf.to_crs(crs_proj).buffer(buff_size * resolution).to_crs(4326).total_bounds
+        bbox_proj, bbox_buff = _bbox_buffer(bbox, buff_size * resolution, crs_proj)
 
-    def _clip_bbox(
-        file_in: str | Path, bbox: tuple[float, float, float, float], file_out: str | Path
-    ) -> None:
-        """Clip a GeoTIFF file to a bounding box."""
-        with rasterio.open(file_in) as src:
-            window = rasterio.windows.from_bounds(*bbox, transform=src.transform)
-            meta = src.meta.copy()
-            meta.update(
-                {
-                    "driver": "GTiff",
-                    "height": window.height,
-                    "width": window.width,
-                    "transform": rasterio.windows.transform(window, src.transform),
-                    "nodata": math.nan,
-                }
-            )
-            data = src.read(window=window)
-            data[data == src.nodata] = math.nan
-            with rasterio.open(file_out, "w", **meta) as dst:
-                dst.write(data)
-
-    _clip_bbox(url[resolution], bbox_buff, tif_path)
-
+    dem = cast("xr.DataArray", rxr.open_rasterio(url[resolution]).squeeze(drop=True))
+    dem = dem.rio.clip_box(*bbox_buff)
+    dem = dem.where(dem > dem.rio.nodata, drop=False).rio.write_nodata(np.nan)
     if to_5070:
-        dst_crs = 5070
-        with rasterio.open(tif_path) as src:
-            transform, width, height = calculate_default_transform(
-                src.crs, dst_crs, src.width, src.height, *src.bounds
-            )
-            kwargs = src.meta.copy()
-            kwargs.update(
-                {"crs": dst_crs, "transform": transform, "width": width, "height": height}
-            )
-            tif_tmp = tif_path.with_suffix(".tmp.tif")
-            with rasterio.open(tif_tmp, "w", **kwargs) as dst:
-                reproject(
-                    source=rasterio.band(src, 1),
-                    destination=rasterio.band(dst, 1),
-                    src_transform=src.transform,
-                    src_crs=src.crs,
-                    dst_transform=transform,
-                    dst_crs=dst_crs,
-                    resampling=Resampling.nearest,
-                )
-        _clip_bbox(tif_tmp, bbox_proj, tif_path)
-        tif_tmp.unlink()
+        dem = dem.rio.reproject(crs_proj).rio.clip_box(*bbox_proj)
+    dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})
+    dem.name = "elevation"
+    dem.rio.to_raster(tif_path)
+    dem.close()
 
 
 def tif_to_da(
