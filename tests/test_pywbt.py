@@ -201,7 +201,7 @@ def test_wrong_res() -> None:
 
 
 def test_dem_utils(temp_dir: str) -> None:
-    bbox = (-95.20, 29.70, -95.201, 29.701)
+    bbox = (-95.201, 29.70, -95.20, 29.701)
     fname_3dep = Path(temp_dir) / "3dep.tif"
     pywbt.dem_utils.get_3dep(bbox, fname_3dep, resolution=30, to_5070=True)
     d3 = pywbt.dem_utils.tif_to_da(fname_3dep)
