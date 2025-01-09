@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## \[Unreleased\]
+## [Unreleased]
 
 ### Added
 
@@ -13,7 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-## \[0.2.7\] - 2024-10-31
+## [0.2.8] - 2024-10-31
+
+### Added
+
+- Added a command line interface to allow invoking ``pywbt`` from the command line.
+    It only requires specifying path to a configuration file written in TOML format.
+    An example configuration file can be found
+    [here](https://raw.githubusercontent.com/cheginit/pywbt/main/tests/config.toml).
+
+    ```bash
+    pywbt path/to/config.toml
+    ```
+
+- Made `prepare_wbt` public so users can run this function once to download the
+    WBT executable and then use the `whitebox_tools` function to run the tools.
+    This can help avoid downloading the WBT executable multiple times when running
+    `pywbt` in parallel or in different scripts.
+- Added `filelock` as a dependency so only one process can download the WBT executable
+    at a time. This is to avoid race conditions when multiple processes try to
+    setup the WBT executable at the same time.
+
+## [0.2.7] - 2024-10-31
 
 ### Fixed
 
@@ -21,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     issue would have caused an infinite loop when trying to copy the Shapefile
     and its auxiliary files. ({{ issue(3) }})
 
-## \[0.2.6\] - 2024-10-09
+## [0.2.6] - 2024-10-09
 
 ### Fixed
 
@@ -31,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     reliable. The fix is to use the `tempfile.TemporaryDirectory` context
     manager to create a temporary directory in the current working directory.
 
-## \[0.2.5\] - 2024-10-08
+## [0.2.5] - 2024-10-08
 
 ### Fixed
 
@@ -39,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     This ensures that the auxiliary files are also stored to `save_dir` when
     `files_to_save` is provided.
 
-## \[0.2.4\] - 2024-09-24
+## [0.2.4] - 2024-09-24
 
 ### Added
 
@@ -58,7 +79,7 @@ or using `micromamba`:
 micromamba install -c conda-forge pywbt 'geopandas-base>=1' planetary-computer pystac-client rioxarray
 ```
 
-## \[0.2.3\] - 2024-09-19
+## [0.2.3] - 2024-09-19
 
 ### Added
 
@@ -74,7 +95,7 @@ micromamba install -c conda-forge pywbt 'geopandas-base>=1' planetary-computer p
     tools, and `pd.DataFrame(pywbt.tool_parameters("BreachDepressions"))` to get a `pandas.DataFrame`
     of the parameters for the `BreachDepressions` tool.
 
-## \[0.2.2\] - 2024-09-17
+## [0.2.2] - 2024-09-17
 
 ### Added
 
@@ -99,7 +120,7 @@ micromamba install -c conda-forge pywbt 'geopandas-base>=1' planetary-computer p
     `platform.system()` once and caching the result.
 - Improve the writing of the documentation.
 
-## \[0.2.0\] - 2024-09-2
+## [0.2.0] - 2024-09-2
 
 ### Highlights
 
@@ -140,12 +161,12 @@ directory. This change makes the function more user-friendly and easier to use.
 - Added a new function to the `utils` module of the example notebooks to get DEM data from
     the USGS's 3D Elevation Program (3DEP).
 
-## \[0.1.1\] - 2024-09-1
+## [0.1.1] - 2024-09-1
 
 - This release has no changes, it is just to trigger the release process since
     the initial release on PyPi did not include the archive which is needed for
     `conda-forge` to build the package.
 
-## \[0.1.0\] - 2024-08-31
+## [0.1.0] - 2024-08-31
 
 - Initial release.
