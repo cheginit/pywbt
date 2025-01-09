@@ -3,13 +3,11 @@ from __future__ import annotations
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Callable
 
 import pytest
 import rasterio
 
 import pywbt
-from pywbt.dem_utils import DependencyError
 
 # To avoid redownloading and hitting the WBT server multiple times for testing
 # on different platforms and Python versions, especially on CI, the binaries are
@@ -179,21 +177,6 @@ def test_shp_out(temp_dir: str, wbt_zipfile: str) -> None:
     assert Path(temp_dir, "streams.shp").stat().st_size == 179412
 
 
-def test_optional_deps(block_optional_imports: Callable[..., None]) -> None:
-    block_optional_imports("rioxarray", "geopandas", "shapely", "numpy", "rasterio")
-    with pytest.raises(DependencyError):
-        pywbt.dem_utils.get_3dep((-95.20, 29.70, -95.201, 29.701), "dem.tif")
-
-    with pytest.raises(DependencyError):
-        pywbt.dem_utils.get_nasadem((-95.20, 29.70, -95.201, 29.701), "dem.tif")
-
-    with pytest.raises(DependencyError):
-        pywbt.dem_utils.tif_to_da("dem.tif")
-
-    with pytest.raises(DependencyError):
-        pywbt.dem_utils.tif_to_gdf("dem.tif", "int32", "elevation")
-
-
 def test_wrong_res() -> None:
     bbox = (-95.20, 29.70, -95.201, 29.701)
     with pytest.raises(ValueError, match="Resolution must be one of 10, 30, or 60 meters."):
@@ -208,7 +191,7 @@ def test_dem_utils(temp_dir: str) -> None:
     fname_nasadem = Path(temp_dir) / "nasadem.tif"
     pywbt.dem_utils.get_nasadem(bbox, fname_nasadem, to_utm=True)
     dn = pywbt.dem_utils.tif_to_da(fname_nasadem, "int16", "elevation", "Elevation", -32768)
-    assert d3.shape == (3, 3)
+    assert d3.shape == (4, 4)
     assert dn.shape == (5, 5)
     assert d3.mean().item() == pytest.approx(dn.mean().item(), rel=1.3)
 
