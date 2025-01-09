@@ -304,7 +304,7 @@ test39 = { features = [ "test", "dem", "cli", "py39" ] }
 test313 = { features = [ "test", "dem", "cli", "py313" ] }
 typecheck = { features = [ "typecheck", "dem", "cli", "py313" ] }
 lint = { features = [ "lint", "py313" ], no-default-feature = true }
-docs = { features = [ "docs", "py313" ], no-default-feature = true }
+docs = { features = [ "docs", "py313" ] }
 
 [tool.pixi.feature.test.tasks]
 test = "pytest"
