@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     import xarray as xr
 
 
-__all__ = ["get_nasadem", "get_3dep", "tif_to_da", "tif_to_gdf"]
+__all__ = ["get_3dep", "get_nasadem", "tif_to_da", "tif_to_gdf"]
 
 
 class DependencyError(ImportError):
