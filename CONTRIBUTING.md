@@ -108,25 +108,66 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/chegin
 
 ### Your First Code Contribution
 
-For this project we use [Pixi](https://pixi.sh/latest/). Please follow in the installation
-instructions in the its documentation based on your platform. Once you have installed Pixi,
-you need to initialize the project by running the following command in the root directory of the project:
+Ready to contribute? Here's how to set up PyWBT for local development.
 
-```bash
-pixi install
-```
+1. Fork the PyWBT repo through the GitHub website.
 
-This will install all the necessary dependencies for the project. Once you make changes
-to the project, there are six steps that you need to follow:
+1. Clone your fork locally and add the main `pywbt` as the upstream remote:
 
-1. Add tests for your changes either in `tests/test_pywbt.py` file or
-    create a new file in the `tests` directory with the name `test_<module_name>.py`.
-1. Run `pixi r -e test39` and `pixi r -e test313` to run the tests.
-1. Run `pixi lint` for auto-formatting and to check any linting errors.
-1. Run `pixi r typecheck` to check for type errors.
-1. Document your changes in the `CHANGELOG.md` file. Please make sure to
-    include any associated issue numbers, if applicable, and your GitHub username.
-1. Commit your changes using the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification and create a pull request.
+    ```console
+    git clone git@github.com:your_name_here/pywbt.git
+    git remote add upstream git@github.com:cheginit/pywbt.git
+    ```
+
+1. Install [Pixi](https://pixi.sh/latest/) then install the development environments:
+
+    ```console
+    cd pywbt/
+    pixi install -e dev
+    ```
+
+1. Create a branch for local development:
+
+    ```console
+    git checkout -b bugfix-or-feature/name-of-your-bugfix-or-feature
+    git push
+    ```
+
+1. Now you can make your changes locally, make sure to add a description of the changes
+    to `CHANGELOG.md` file based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+    and add extra tests, if applicable, to `tests` folder. Also,
+    make sure to give yourself credit by adding your name at the end of the item(s)
+    that you add in the history like this `by [Your Name](https://github.com/your_handle)`.
+    Then, fetch the latest updates from the remote and resolve any merge conflicts:
+
+    ```console
+    git fetch upstream
+    git merge upstream/name-of-your-branch
+    ```
+
+1. Then create a new environment for linting and another for testing:
+
+    ```console
+    pixi r lint
+    pixi r typecheck
+    pixi r -e test39 test
+    pixi r -e test313 test
+    ```
+
+1. If you are making breaking changes make sure to reflect them in the
+    documentation, `README.md`, and tests if necessary.
+
+1. Commit your changes and push your branch to GitHub following
+    [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+    specification. For example:
+
+    ```console
+    git add .
+    git commit -m "feat: a detailed description of your changes."
+    git push origin name-of-your-branch
+    ```
+
+1. Submit a pull request through the GitHub website.
 
 ### Improving The Documentation
 
