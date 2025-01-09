@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+import subprocess
 from pathlib import Path
 from typing import Callable
 
@@ -164,13 +165,17 @@ def test_shp_out(temp_dir: str, wbt_zipfile: str) -> None:
         "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
         "D8FlowAccumulation": ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"],
         "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
-        "RasterToVectorLines" : ["-i=streams.tif", "-o=streams.shp"],
+        "RasterToVectorLines": ["-i=streams.tif", "-o=streams.shp"],
     }
     shutil.copy("tests/dem.tif", temp_dir)
-    pywbt.whitebox_tools(temp_dir, wbt_args, ["streams.shp"],
+    pywbt.whitebox_tools(
+        temp_dir,
+        wbt_args,
+        ["streams.shp"],
         save_dir=temp_dir,
         wbt_root=Path(temp_dir) / "WBT",
-        zip_path=Path(temp_dir) / wbt_zipfile,)
+        zip_path=Path(temp_dir) / wbt_zipfile,
+    )
     assert Path(temp_dir, "streams.shp").stat().st_size == 179412
 
 
@@ -206,3 +211,76 @@ def test_dem_utils(temp_dir: str) -> None:
     assert d3.shape == (4, 4)
     assert dn.shape == (5, 5)
     assert d3.mean().item() == pytest.approx(dn.mean().item(), rel=1.3)
+
+
+@pytest.fixture
+def valid_toml_file() -> Path:
+    return Path("tests/config.toml")
+
+
+@pytest.fixture
+def invalid_toml_file_not_dict(tmp_path: Path) -> Path:
+    content = """
+    src_dir = "data/input"
+    arg_dict = "not_a_dict"
+    """
+    toml_file = tmp_path / "invalid_config.toml"
+    toml_file.write_text(content)
+    return toml_file
+
+
+@pytest.fixture
+def invalid_toml_file_missing(tmp_path: Path) -> Path:
+    content = """
+    src_dir = "data/input"
+    """
+    toml_file = tmp_path / "invalid_config.toml"
+    toml_file.write_text(content)
+    return toml_file
+
+
+def test_cli_valid_toml(valid_toml_file: Path):
+    Path("tests/temp_dir_cli").mkdir(exist_ok=True, parents=True)
+    shutil.copy("tests/dem.tif", "tests/temp_dir_cli/dem.tif")
+    result = subprocess.run(
+        ["pywbt", str(valid_toml_file)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert Path("tests", "temp_dir_cli", "dem_corr.tif").stat().st_size == 567662
+    shutil.rmtree("tests/temp_dir_cli")
+
+
+def test_cli_invalid_toml_missing(invalid_toml_file_missing: Path):
+    result = subprocess.run(
+        ["pywbt", str(invalid_toml_file_missing)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "The TOML file must define" in result.stderr
+
+
+def test_cli_invalid_toml(invalid_toml_file_not_dict: Path):
+    result = subprocess.run(
+        ["pywbt", str(invalid_toml_file_not_dict)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "The TOML file must define" in result.stderr
+
+
+def test_cli_missing_toml():
+    result = subprocess.run(
+        ["pywbt", "missing_config.toml"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "File not found" in result.stderr
