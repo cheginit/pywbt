@@ -14,7 +14,7 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def add_doctest_imports(doctest_namespace: dict[str, object]) -> None:  # noqa: PT004
+def add_doctest_imports(doctest_namespace: dict[str, object]) -> None:
     """Add pywbt namespace for doctest."""
     import pywbt
 
