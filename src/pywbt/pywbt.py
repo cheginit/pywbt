@@ -9,17 +9,19 @@ import re
 import shutil
 import stat
 import subprocess
-import tempfile
 import urllib.error
 import urllib.request
 import zipfile
 from functools import lru_cache
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Literal
+
+from filelock import SoftFileLock
 
 BASE_URL = "https://www.whiteboxgeo.com/WBT_{}/WhiteboxTools_{}.zip"
 
-__all__ = ["whitebox_tools", "list_tools", "tool_parameters"]
+__all__ = ["list_tools", "prepare_wbt", "tool_parameters", "whitebox_tools"]
 
 if TYPE_CHECKING:
     from subprocess import CompletedProcess
@@ -95,49 +97,92 @@ def _get_wbt_version(exe_path: str | Path) -> str:
         raise RuntimeError(f"Error running WhiteboxTools: {e!s}") from e
 
 
-def _download_wbt(
-    wbt_root: str | Path,
+def _attempt_prepare_wbt(
+    wbt_root: Path,
     zip_path: str | Path | None,
     refresh_download: bool,
-) -> str:
-    """Download the WhiteboxTools executable for the current platform."""
+) -> str | None:
+    """Attempt to prepare WhiteboxTools once and return version or ``None`` if fails."""
     system, platform_suffix, exe_name = _get_platform_suffix()
     url = BASE_URL.format(system, platform_suffix)
-    wbt_root = Path(wbt_root)
 
     exe_path = wbt_root / exe_name
     if exe_path.exists() and not refresh_download:
         logger.info(f"Using existing WhiteboxTools executable: {exe_path}")
         try:
             return _get_wbt_version(exe_path)
-        except RuntimeError:
-            msg = f"Failed to get version from existing executable: {exe_path}. Redownloading..."
-            logger.warning(msg)
-            return _download_wbt(wbt_root, zip_path, True)
+        except RuntimeError as e:
+            logger.warning(f"Existing executable is invalid: {e}")
+            return None
 
     shutil.rmtree(wbt_root, ignore_errors=True)
 
-    with tempfile.TemporaryDirectory(prefix="wbt_", dir=".") as temp_dir:
-        temp_path = Path(temp_dir)
-        zip_path = temp_path / Path(url).name if zip_path is None else Path(zip_path)
-        zip_path.parent.mkdir(parents=True, exist_ok=True)
-        zip_path = zip_path.with_suffix(".zip")
+    with TemporaryDirectory(prefix="wbt_", dir=".") as tmp:
+        temp_path = Path(tmp)
+        zip_path_local = temp_path / Path(url).name if zip_path is None else Path(zip_path)
+        zip_path_local.parent.mkdir(parents=True, exist_ok=True)
+        zip_path_local = zip_path_local.with_suffix(".zip")
         if refresh_download:
-            zip_path.unlink(missing_ok=True)
+            zip_path_local.unlink(missing_ok=True)
 
-        if not zip_path.exists():
+        if not zip_path_local.exists():
             logger.info(f"Downloading WhiteboxTools from {url}")
             try:
-                urllib.request.urlretrieve(url, zip_path)
+                urllib.request.urlretrieve(url, zip_path_local)
             except urllib.error.URLError as e:
-                raise RuntimeError(f"Failed to download WhiteboxTools: {e!s}") from e
+                logger.warning(f"Download failed: {e}")
+                return None
+
         try:
-            _extract_wbt(zip_path, wbt_root, temp_path, system)
+            _extract_wbt(zip_path_local, wbt_root, temp_path, system)
             return _get_wbt_version(exe_path)
-        except RuntimeError:
-            msg = f"Failed to extract {zip_path}. Redownloading..."
-            logger.warning(msg)
-            return _download_wbt(wbt_root, zip_path, True)
+        except RuntimeError as e:
+            logger.warning(f"Extraction failed: {e}")
+            zip_path_local.unlink(missing_ok=True)
+            shutil.rmtree(wbt_root, ignore_errors=True)
+            return None
+
+
+def prepare_wbt(
+    wbt_root: str | Path,
+    zip_path: str | Path | None = None,
+    refresh_download: bool = False,
+    max_attempts: int = 3,
+) -> str:
+    """Download the WhiteboxTools executable for the current platform.
+
+    Parameters
+    ----------
+    wbt_root : str or Path
+        Root directory to extract WhiteboxTools to.
+    zip_path : str or Path, optional
+        Path to the zip file containing the WhiteboxTools executables, defaults to ``None``.
+        If ``None``, the zip file will be downloaded to a temporary directory that gets
+        deleted after the function finishes. Otherwise, the zip file will be saved to
+        the specified path.
+    refresh_download : bool, optional
+        Whether to refresh the download even if WhiteboxTools is found.
+        Defaults to ``False``.
+    max_attempts : int, optional
+        Maximum number of attempts to prepare WhiteboxTools, defaults to 3.
+
+    Returns
+    -------
+    str
+        Version of WhiteboxTools.
+    """
+    wbt_root = Path(wbt_root)
+    lock_path = wbt_root / ".wbt_lock"
+
+    # Acquire lock to allow only one process to prepare WhiteboxTools
+    with SoftFileLock(lock_path):
+        for attempt in range(max_attempts):
+            version = _attempt_prepare_wbt(wbt_root, zip_path, refresh_download)
+            if version:
+                return version
+            logger.warning(f"Attempt {attempt + 1}/{max_attempts} failed, retrying...")
+
+        raise RuntimeError(f"Failed to prepare WhiteboxTools after {max_attempts} attempts.")
 
 
 def _run_wbt(
@@ -216,9 +261,7 @@ class _WBTSession:
             for file in self.files_to_save:
                 if file.endswith(".shp"):
                     stem = file[:-4]
-                    self.files_to_save.extend(
-                        [f"{stem}.dbf", f"{stem}.prj", f"{stem}.shx"]
-                    )
+                    self.files_to_save.extend([f"{stem}.dbf", f"{stem}.prj", f"{stem}.shx"])
 
         self.save_dir = save_dir
         self.version = version
@@ -386,7 +429,7 @@ def whitebox_tools(
     save_dir = Path(save_dir) if save_dir else Path.cwd()
     save_dir.mkdir(parents=True, exist_ok=True)
 
-    version = _download_wbt(wbt_root, zip_path, refresh_download)
+    version = prepare_wbt(wbt_root, zip_path, refresh_download)
 
     if not isinstance(arg_dict, dict) or not all(
         isinstance(k, str) and isinstance(v, (list, tuple)) for k, v in arg_dict.items()
@@ -405,7 +448,7 @@ def _run_wbt_cmd(
 ) -> CompletedProcess[str]:
     """Run WhiteboxTools command to list available tools and their options."""
     logger.setLevel(logging.WARNING)
-    _ = _download_wbt(wbt_root, zip_path, False)
+    _ = prepare_wbt(wbt_root, zip_path, False)
     _, _, exe_name = _get_platform_suffix()
     exe_path = Path(wbt_root) / exe_name
     return subprocess.run([str(exe_path), cmd], capture_output=True, text=True, check=True)
