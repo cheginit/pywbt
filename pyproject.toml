@@ -58,7 +58,7 @@ optional-dependencies.dev = [
   "pystac-client",
   "pytest",
   "rioxarray",
-  "tomli>=1.1; python_full_version<='3.11.0a6'",
+  "tomli>=1.1; python_version<'3.11'",
 ]
 optional-dependencies.docs = [
   "black",
@@ -293,10 +293,10 @@ gdal = "*"
 gdal = "*"
 
 [tool.pixi.feature.py39.dependencies]
-python = "~=3.9"
+python = "~=3.9.0"
 
 [tool.pixi.feature.py313.dependencies]
-python = "~=3.13"
+python = "~=3.13.0"
 
 [tool.pixi.environments]
 dev = { features = [ "dev", "py313" ] }
