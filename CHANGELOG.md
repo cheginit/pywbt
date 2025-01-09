@@ -13,26 +13,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-## [0.2.8] - 2024-10-31
+## [0.2.8] - 2025-01-09
+
+This release adds `filelock` as a dependency and `tomli` as an optional dependency.
 
 ### Added
 
-- Added a command line interface to allow invoking ``pywbt`` from the command line.
+- Add a command line interface to allow invoking `pywbt` from the command line.
     It only requires specifying path to a configuration file written in TOML format.
-    An example configuration file can be found
-    [here](https://raw.githubusercontent.com/cheginit/pywbt/main/tests/config.toml).
+    This adds `tomli` as a new optional dependency for parsing the TOML configuration
+    file if Python version is less than 3.11. Otherwise, Python's built-in `tomllib`
+    module is used to parse the configuration file.An example configuration file can be
+    found [here](https://raw.githubusercontent.com/cheginit/pywbt/main/tests/config.toml).
 
     ```bash
     pywbt path/to/config.toml
     ```
 
-- Made `prepare_wbt` public so users can run this function once to download the
+- Make `prepare_wbt` public so users can run this function once to download the
     WBT executable and then use the `whitebox_tools` function to run the tools.
     This can help avoid downloading the WBT executable multiple times when running
     `pywbt` in parallel or in different scripts.
-- Added `filelock` as a dependency so only one process can download the WBT executable
-    at a time. This is to avoid race conditions when multiple processes try to
-    setup the WBT executable at the same time.
+
+- Use `filelock` library so only one instances of `prepare_wbt` can download the
+    WBT executable at a time. This is to avoid race conditions when multiple processes
+    try to setup the WBT executable at the same time.
 
 ## [0.2.7] - 2024-10-31
 
