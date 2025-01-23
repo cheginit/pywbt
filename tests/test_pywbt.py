@@ -181,17 +181,23 @@ def test_shp_out(temp_dir: str, wbt_zipfile: str) -> None:
 
 
 @pytest.mark.xfail(is_linux, reason="pyproj seem to have issues on Linux.")
-def test_dem_utils(temp_dir: str) -> None:
+def test_dem_3dep(temp_dir: str) -> None:
     bbox = (-95.201, 29.70, -95.20, 29.701)
     fname_3dep = Path(temp_dir) / "3dep.tif"
     pywbt.dem_utils.get_3dep(bbox, fname_3dep, resolution=30, to_5070=True)
     d3 = pywbt.dem_utils.tif_to_da(fname_3dep)
+    assert d3.shape == (5, 4)
+    assert d3.mean().item() == pytest.approx(8.4095)
+
+
+@pytest.mark.xfail(is_linux, reason="pyproj seem to have issues on Linux.")
+def test_dem_nasadem(temp_dir: str) -> None:
+    bbox = (-95.201, 29.70, -95.20, 29.701)
     fname_nasadem = Path(temp_dir) / "nasadem.tif"
     pywbt.dem_utils.get_nasadem(bbox, fname_nasadem, to_utm=True)
     dn = pywbt.dem_utils.tif_to_da(fname_nasadem, "int16", "elevation", "Elevation", -32768)
-    assert d3.shape == (5, 4)
     assert dn.shape == (5, 5)
-    assert d3.mean().item() == pytest.approx(dn.mean().item(), rel=1.3)
+    assert dn.mean().item() == pytest.approx(9.76)
 
 
 @pytest.fixture
