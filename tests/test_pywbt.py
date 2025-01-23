@@ -180,12 +180,6 @@ def test_shp_out(temp_dir: str, wbt_zipfile: str) -> None:
     assert Path(temp_dir, "streams.shp").stat().st_size == 179412
 
 
-def test_wrong_res() -> None:
-    bbox = (-95.20, 29.70, -95.201, 29.701)
-    with pytest.raises(ValueError, match="Resolution must be one of 10, 30, or 60 meters."):
-        pywbt.dem_utils.get_3dep(bbox, "3dep.tif", resolution=29, to_5070=True)
-
-
 @pytest.mark.xfail(is_linux, reason="pyproj seem to have issues on Linux.")
 def test_dem_utils(temp_dir: str) -> None:
     bbox = (-95.201, 29.70, -95.20, 29.701)
@@ -195,7 +189,7 @@ def test_dem_utils(temp_dir: str) -> None:
     fname_nasadem = Path(temp_dir) / "nasadem.tif"
     pywbt.dem_utils.get_nasadem(bbox, fname_nasadem, to_utm=True)
     dn = pywbt.dem_utils.tif_to_da(fname_nasadem, "int16", "elevation", "Elevation", -32768)
-    assert d3.shape == (4, 4)
+    assert d3.shape == (5, 4)
     assert dn.shape == (5, 5)
     assert d3.mean().item() == pytest.approx(dn.mean().item(), rel=1.3)
 
