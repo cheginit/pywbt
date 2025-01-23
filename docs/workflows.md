@@ -1,10 +1,11 @@
 # Workflows
 
 Here are some useful workflows for geospatial operations using WhiteboxTools and PyWBT.
-You can copy-paste and customize these workflows into your Python script and pass them to the
-`arg_dict` argument of `pywbt.whitebox_tools` function.
+You can copy-paste and customize these workflows into your Python script and pass them
+to the `arg_dict` argument of `pywbt.whitebox_tools` function.
 
-Contributing to this list is highly appreciated. You can just click on the `Edit this page` link at the top right of this page.
+Contributing to this list is highly appreciated. You can just click on the
+`Edit this page` link at the top right of this page.
 
 ## Topographic Wetness Index
 

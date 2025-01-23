@@ -12,10 +12,10 @@
 
 ## Overview
 
-**PyWBT** is a Python wrapper for the [WhiteboxTools](https://www.whiteboxgeo.com/) (WBT)
-geospatial analysis library. It simplifies geospatial workflows by providing an easy-to-use
-Pythonic interface while maintaining a minimal dependency footprint—relying only on Python's
-built-in modules.
+**PyWBT** is a Python wrapper for the [WhiteboxTools](https://www.whiteboxgeo.com/)
+(WBT) geospatial analysis library. It simplifies geospatial workflows by providing an
+easy-to-use Pythonic interface while maintaining a minimal dependency footprint—relying
+only on Python's built-in modules.
 
 You can try PyWBT directly in your browser by clicking the Binder badge above.
 
@@ -24,7 +24,10 @@ You can try PyWBT directly in your browser by clicking the Binder badge above.
 - Lightweight Python interface for WBT’s command-line tools.
 - Seamless integration with WBT for custom geospatial workflows.
 - Minimal dependencies for ease of installation.
-- Optional `dem_utils` module for obtaining and preprocessing DEM data from [3DEP](https://www.usgs.gov/3d-elevation-program) (US only at 10, 30, and 60 m resolutions) and [NASADEM](https://planetarycomputer.microsoft.com/dataset/nasadem) (global coverage at 30 m resolution).
+- Optional `dem_utils` module for obtaining and preprocessing DEM data from
+    [3DEP](https://www.usgs.gov/3d-elevation-program) (US only at 10, 30, and 60 m
+    resolutions) and [NASADEM](https://planetarycomputer.microsoft.com/dataset/nasadem)
+    (global coverage at 30 m resolution).
 
 ## Installation
 
@@ -44,8 +47,9 @@ micromamba install -c conda-forge pywbt
 
 ## Quick Start
 
-PyWBT enables the execution of WBT tools with the `whitebox_tools` function, which manages the
-environment setup, including downloading the WBT executable for your operating system.
+PyWBT enables the execution of WBT tools with the `whitebox_tools` function, which
+manages the environment setup, including downloading the WBT executable for your
+operating system.
 
 ### Basic Usage
 
@@ -74,14 +78,14 @@ For more detailed workflows and usage patterns, refer to the
 
 ### Managing Output Files
 
-To manage the output, specify which intermediate files to keep using the `files_to_save` argument.
-Only those files listed will be saved, and the rest will be deleted. By default, all files are
-stored in `save_dir` (the current working directory, by default).
+To manage the output, specify which intermediate files to keep using the `files_to_save`
+argument. Only those files listed will be saved, and the rest will be deleted. By
+default, all files are stored in `save_dir` (the current working directory, by default).
 
 ### Tool Lookup
 
-Use `list_tools` and `tool_parameters` to explore available tools and their arguments. Here's an
-example using `pandas` for querying tools:
+Use `list_tools` and `tool_parameters` to explore available tools and their arguments.
+Here's an example using `pandas` for querying tools:
 
 ```python
 import pandas as pd
@@ -98,8 +102,8 @@ pd.DataFrame(pywbt.tool_parameters("BreachDepressions"))
 
 ### DEM Utilities
 
-The `dem_utils` module supports downloading and reading DEM data from 3DEP and NASADEM. Install
-optional dependencies for DEM utilities:
+The `dem_utils` module supports downloading and reading DEM data from 3DEP and NASADEM.
+Install optional dependencies for DEM utilities:
 
 ```bash
 pip install pywbt[dem]
@@ -113,8 +117,8 @@ micromamba install -c conda-forge pywbt 'geopandas-base>=1' planetary-computer p
 
 ## Example Workflow
 
-We can delineate the stream network and calculate the Strahler stream order for a
-region in London using PyWBT, as shown below:
+We can delineate the stream network and calculate the Strahler stream order for a region
+in London using PyWBT, as shown below:
 
 ```python
 import pywbt
@@ -148,8 +152,11 @@ For more examples, visit the [documentation](https://pywbt.readthedocs.io).
 
 ## Contributing
 
-We welcome contributions! For guidelines, please refer to the [CONTRIBUTING.md](https://pywbt.readthedocs.io/latest/CONTRIBUTING) and [CODE_OF_CONDUCT.md](https://github.com/cheginit/pywbt/blob/main/CODE_OF_CONDUCT.md).
+We welcome contributions! For guidelines, please refer to the
+[CONTRIBUTING.md](https://pywbt.readthedocs.io/latest/CONTRIBUTING) and
+[CODE_OF_CONDUCT.md](https://github.com/cheginit/pywbt/blob/main/CODE_OF_CONDUCT.md).
 
 ## License
 
-PyWBT is licensed under the MIT License. See the [LICENSE](https://github.com/cheginit/pywbt/blob/main/LICENSE) file for details.
+PyWBT is licensed under the MIT License. See the
+[LICENSE](https://github.com/cheginit/pywbt/blob/main/LICENSE) file for details.
