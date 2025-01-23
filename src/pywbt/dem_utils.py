@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, cast
+import hashlib
+import math
+from collections.abc import Iterable
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal, cast
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     import geopandas as gpd
     import xarray as xr
 
@@ -21,13 +22,14 @@ class DependencyError(ImportError):
     """Raised when a required dependency is not found."""
 
     def __init__(self) -> None:
+        deps = "'geopandas>=1' planetary-computer pystac-client rioxarray seamless-3dep"
         self.message = "\n".join(
             (
                 "The `dem_utils` module has additional dependencies that are not installed.",
                 "Please install them using:",
-                "`pip install 'geopandas>=1' planetary-computer pystac-client rioxarray`",
+                f"`pip install {deps}`",
                 "or:",
-                "`micromamba install -c conda-forge 'geopandas-base>=1' planetary_computer pystac_client rioxarray`",
+                f"`micromamba install -c conda-forge {deps}`",
             )
         )
         super().__init__(self.message)
@@ -38,18 +40,14 @@ class DependencyError(ImportError):
 
 def _check_bbox(bbox: Bbox) -> None:
     """Validate that bbox is in correct form."""
-    if (
-        not isinstance(bbox, Sequence)
-        or len(bbox) != 4
-        or not all(isinstance(x, (int, float)) for x in bbox)
-    ):
+    if not isinstance(bbox, Iterable) or len(bbox) != 4 or not all(map(math.isfinite, bbox)):
         raise TypeError(
             "`bbox` must be a tuple of form (west, south, east, north) in decimal degrees."
         )
 
 
 def _bbox_buffer(bbox: Bbox, buffer: float, crs_proj: int) -> tuple[Bbox, Bbox]:
-    """Buffer the bounding box."""
+    """Buffer a bounding box in WGS 84 and reproject to a given projected CRS."""
     try:
         import shapely
         from pyproj import Transformer
@@ -69,7 +67,7 @@ def _bbox_buffer(bbox: Bbox, buffer: float, crs_proj: int) -> tuple[Bbox, Bbox]:
 
 
 def _estimate_utm(bbox: Bbox) -> int:
-    """Estimate UTM CRS based on bbox."""
+    """Estimate UTM CRS based on centroid of a bbox in WGS 84."""
     try:
         from pyproj.aoi import AreaOfInterest
         from pyproj.database import query_utm_crs_info
@@ -108,29 +106,37 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
         import pystac_client
         import rioxarray as rxr
         import rioxarray.merge as rxr_merge
+        from seamless_3dep._https_download import stream_write
     except ImportError as e:
         raise DependencyError from e
 
     _check_bbox(bbox)
     bbox_buff = bbox_utm = bbox
     utm = 4326
+    dem_res = 30
     if to_utm:
         utm = _estimate_utm(bbox)
-        buff_size, dem_res = 20, 30
+        buff_size = 20
         bbox_utm, bbox_buff = _bbox_buffer(bbox, buff_size * dem_res, utm)
     catalog = pystac_client.Client.open(
         "https://planetarycomputer.microsoft.com/api/stac/v1",
         modifier=planetary_computer.sign_inplace,
     )
-    signed_asset = (
-        planetary_computer.sign(item.assets["elevation"]).href
+    urls = [
+        str(planetary_computer.sign(item.assets["elevation"]).href)
         for item in catalog.search(collections=["nasadem"], bbox=bbox_buff).items()
-    )
+    ]
+    Path("cache").mkdir(exist_ok=True)
+    tiff_list = [
+        Path("cache") / f"nasadem_{hashlib.sha256(href.encode()).hexdigest()}.tiff" for href in urls
+    ]
+    stream_write(urls, tiff_list)
     dem = rxr_merge.merge_arrays(
-        [rxr.open_rasterio(href).squeeze(drop=True) for href in signed_asset]  # pyright: ignore[reportArgumentType]
+        [rxr.open_rasterio(f).squeeze(drop=True) for f in tiff_list]  # pyright: ignore[reportArgumentType]
     )
     if to_utm:
-        dem = dem.rio.reproject(utm).fillna(dem.rio.nodata).rio.clip_box(*bbox_utm)
+        dem = dem.rio.reproject(utm).fillna(dem.rio.nodata)
+    dem = dem.rio.clip_box(*bbox_utm)
     dem.attrs.update({"units": "meters", "vertical_datum": "EGM96"})
     dem.name = "elevation"
     dem.astype("int16").rio.to_raster(tif_path)
@@ -140,7 +146,7 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
 def get_3dep(
     bbox: Bbox,
     tif_path: str | Path,
-    resolution: int = 10,
+    resolution: Literal[10, 30, 60] = 10,
     to_5070: bool = False,
 ) -> None:
     """Get DEM from USGS's 3D Hydrography Elevation Data Program (3DEP).
@@ -158,20 +164,12 @@ def get_3dep(
         Reproject the DEM to EPGS:5070, by default False.
     """
     try:
-        import numpy as np
         import rioxarray as rxr
+        import rioxarray.merge as rxr_merge
+        import seamless_3dep as s3dep
     except ImportError as e:
         raise DependencyError from e
 
-    _check_bbox(bbox)
-    base_url = "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation"
-    url = {
-        10: f"{base_url}/13/TIFF/USGS_Seamless_DEM_13.vrt",
-        30: f"{base_url}/1/TIFF/USGS_Seamless_DEM_1.vrt",
-        60: f"{base_url}/2/TIFF/USGS_Seamless_DEM_2.vrt",
-    }
-    if resolution not in url:
-        raise ValueError("Resolution must be one of 10, 30, or 60 meters.")
     bbox_buff = bbox_proj = bbox
     crs_proj = 4326
     if to_5070:
@@ -179,9 +177,13 @@ def get_3dep(
         buff_size = 20
         bbox_proj, bbox_buff = _bbox_buffer(bbox, buff_size * resolution, crs_proj)
 
-    dem = cast("xr.DataArray", rxr.open_rasterio(url[resolution]).squeeze(drop=True))
-    dem = dem.rio.clip_box(*bbox_buff)
-    dem = dem.where(dem > dem.rio.nodata, drop=False).rio.write_nodata(np.nan)
+    tiff_list = s3dep.get_dem(bbox_buff, "cache", resolution)
+    if len(tiff_list) > 1:
+        dem = rxr_merge.merge_arrays(
+            [rxr.open_rasterio(f).squeeze(drop=True) for f in tiff_list]  # pyright: ignore[reportArgumentType]
+        )
+    else:
+        dem = rxr.open_rasterio(tiff_list[0]).squeeze(drop=True).rio.clip_box(*bbox_buff)
     if to_5070:
         dem = dem.rio.reproject(crs_proj).rio.clip_box(*bbox_proj)
     dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})

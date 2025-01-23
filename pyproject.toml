@@ -46,6 +46,7 @@ optional-dependencies.dem = [
   "planetary-computer",
   "pystac-client",
   "rioxarray",
+  "seamless-3dep>=0.3",
 ]
 optional-dependencies.dev = [
   "folium",
@@ -58,6 +59,7 @@ optional-dependencies.dev = [
   "pystac-client",
   "pytest",
   "rioxarray",
+  "seamless-3dep>=0.3",
   "tomli>=1.1; python_version<'3.11'",
 ]
 optional-dependencies.docs = [
@@ -203,6 +205,7 @@ lint.per-file-ignores."tests/*.py" = [
   "S101",
 ]
 lint.extend-safe-fixes = [
+  "TC004",
   # absolute imports
   "TID252",
 ]
@@ -287,10 +290,10 @@ platforms = [ "linux-64", "osx-64", "osx-arm64", "win-64" ]
 pywbt = { path = ".", editable = true }
 
 [tool.pixi.feature.dev.dependencies]
-gdal = "*"
+libgdal-core = "*"
 
 [tool.pixi.feature.test.dependencies]
-gdal = "*"
+libgdal-core = "*"
 
 [tool.pixi.feature.py39.dependencies]
 python = "~=3.9.0"
