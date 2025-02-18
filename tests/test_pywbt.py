@@ -194,8 +194,12 @@ def test_dem_3dep(temp_dir: str) -> None:
     fname_3dep = Path(temp_dir) / "3dep.tif"
     pywbt.dem_utils.get_3dep(bbox, fname_3dep, resolution=30, to_5070=True)
     d3 = pywbt.dem_utils.tif_to_da(fname_3dep)
-    assert d3.shape == (4, 4)
-    assert d3.mean().item() == pytest.approx(8.49899)
+    assert d3.shape == (5, 4)
+    assert d3.mean().item() == pytest.approx(8.4095)
+    pywbt.dem_utils.get_3dep(bbox, fname_3dep, resolution=50, to_5070=True)
+    d3 = pywbt.dem_utils.tif_to_da(fname_3dep)
+    assert d3.shape == (3, 3)
+    assert d3.mean().item() == pytest.approx(8.4552)
 
 
 @pytest.mark.xfail(is_linux, reason="pyproj seem to have issues on Linux.")
