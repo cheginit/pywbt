@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Literal, cast
+from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     import geopandas as gpd
     import xarray as xr
 
@@ -22,7 +21,7 @@ class DependencyError(ImportError):
     """Raised when a required dependency is not found."""
 
     def __init__(self) -> None:
-        deps = "'geopandas>=1' planetary-computer pystac-client rioxarray seamless-3dep"
+        deps = "'geopandas>=1' planetary-computer pystac-client rioxarray"
         self.message = "\n".join(
             (
                 "The `dem_utils` module has additional dependencies that are not installed.",
@@ -49,7 +48,6 @@ def _check_bbox(bbox: Bbox) -> None:
 def _bbox_buffer(bbox: Bbox, buffer: float, crs_proj: int) -> tuple[Bbox, Bbox]:
     """Buffer a bounding box in WGS 84 and reproject to a given projected CRS."""
     try:
-        import shapely
         from pyproj import Transformer
     except ImportError as e:
         raise DependencyError from e
@@ -58,10 +56,9 @@ def _bbox_buffer(bbox: Bbox, buffer: float, crs_proj: int) -> tuple[Bbox, Bbox]:
     maxx, maxy = transformer.transform(bbox[2], bbox[3])
     bbox_proj = (minx, miny, maxx, maxy)
 
-    bbox_buff = shapely.box(*bbox_proj).buffer(buffer).bounds
     transformer = Transformer.from_crs(crs_proj, 4326, always_xy=True)
-    minx, miny = transformer.transform(bbox_buff[0], bbox_buff[1])
-    maxx, maxy = transformer.transform(bbox_buff[2], bbox_buff[3])
+    minx, miny = transformer.transform(minx - buffer, miny - buffer)
+    maxx, maxy = transformer.transform(maxx + buffer, maxy + buffer)
     bbox_buff = (minx, miny, maxx, maxy)
     return bbox_proj, bbox_buff
 
@@ -106,6 +103,7 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
         import pystac_client
         import rioxarray as rxr
         import rioxarray.merge as rxr_merge
+        from tiny_retriever import download, unique_filename
     except ImportError as e:
         raise DependencyError from e
 
@@ -120,12 +118,17 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
         "https://planetarycomputer.microsoft.com/api/stac/v1",
         modifier=planetary_computer.sign_inplace,
     )
-    signed_asset = (
+    urls = [
         planetary_computer.sign(item.assets["elevation"]).href
         for item in catalog.search(collections=["nasadem"], bbox=bbox_buff).items()
-    )
+    ]
+    fnames = [
+        Path("cache") / unique_filename(url, prefix="nasadem_", file_extension="tif")
+        for url in urls
+    ]
+    download(urls, fnames, timeout=700)
     dem = rxr_merge.merge_arrays(
-        [rxr.open_rasterio(href).squeeze(drop=True) for href in signed_asset]  # pyright: ignore[reportArgumentType]
+        [rxr.open_rasterio(f).squeeze(drop=True) for f in fnames]  # pyright: ignore[reportArgumentType]
     )
     if to_utm:
         dem = dem.rio.reproject(utm).fillna(dem.rio.nodata)
@@ -139,7 +142,7 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
 def get_3dep(
     bbox: Bbox,
     tif_path: str | Path,
-    resolution: Literal[10, 30, 60] = 10,
+    resolution: int = 10,
     to_5070: bool = False,
 ) -> None:
     """Get DEM from USGS's 3D Hydrography Elevation Data Program (3DEP).
@@ -157,20 +160,12 @@ def get_3dep(
         Reproject the DEM to EPGS:5070, by default False.
     """
     try:
-        import numpy as np
         import rioxarray as rxr
+        import rioxarray.merge as rxr_merge
+        from seamless_3dep import get_dem, get_map
     except ImportError as e:
         raise DependencyError from e
 
-    _check_bbox(bbox)
-    base_url = "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation"
-    url = {
-        10: f"{base_url}/13/TIFF/USGS_Seamless_DEM_13.vrt",
-        30: f"{base_url}/1/TIFF/USGS_Seamless_DEM_1.vrt",
-        60: f"{base_url}/2/TIFF/USGS_Seamless_DEM_2.vrt",
-    }
-    if resolution not in url:
-        raise ValueError("Resolution must be one of 10, 30, or 60 meters.")
     bbox_buff = bbox_proj = bbox
     crs_proj = 4326
     if to_5070:
@@ -178,9 +173,13 @@ def get_3dep(
         buff_size = 20
         bbox_proj, bbox_buff = _bbox_buffer(bbox, buff_size * resolution, crs_proj)
 
-    dem = cast("xr.DataArray", rxr.open_rasterio(url[resolution]).squeeze(drop=True))
-    dem = dem.rio.clip_box(*bbox_buff)
-    dem = dem.where(dem > dem.rio.nodata, drop=False).rio.write_nodata(np.nan)
+    if resolution in (10, 30, 60):
+        tiff_files = get_dem(bbox_buff, "cache", resolution)
+    else:
+        tiff_files = get_map("DEM", bbox_buff, "cache", resolution)
+    dem = rxr_merge.merge_arrays(
+        [rxr.open_rasterio(f).squeeze(drop=True) for f in tiff_files]  # pyright: ignore[reportArgumentType]
+    )
     if to_5070:
         dem = dem.rio.reproject(crs_proj).rio.clip_box(*bbox_proj)
     dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})
