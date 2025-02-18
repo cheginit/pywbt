@@ -328,7 +328,9 @@ class _WBTSession:
                 logger.info("Deleted remaining intermediate files.")
             else:
                 for file in self.outputs:
-                    shutil.move(self.src_dir / file, self.save_dir)
+                    out_file = Path(self.save_dir, file)
+                    out_file.unlink(missing_ok=True)
+                    shutil.move(self.src_dir / file, out_file)
         elif self.files_to_save is not None:
             for file in self.outputs:
                 if file not in self.files_to_save:
