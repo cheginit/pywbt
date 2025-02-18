@@ -144,7 +144,7 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
 
 
 def get_3dep(
-    bbox: Bbox,
+    bbox: tuple[float, float, float, float],
     tif_path: str | Path,
     resolution: Literal[10, 30, 60] = 10,
     to_5070: bool = False,
@@ -164,12 +164,19 @@ def get_3dep(
         Reproject the DEM to EPGS:5070, by default False.
     """
     try:
+        import numpy as np
         import rioxarray as rxr
-        import rioxarray.merge as rxr_merge
-        import seamless_3dep as s3dep
     except ImportError as e:
         raise DependencyError from e
 
+    base_url = "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation"
+    url = {
+        10: f"{base_url}/13/TIFF/USGS_Seamless_DEM_13.vrt",
+        30: f"{base_url}/1/TIFF/USGS_Seamless_DEM_1.vrt",
+        60: f"{base_url}/2/TIFF/USGS_Seamless_DEM_2.vrt",
+    }
+    if resolution not in url:
+        raise ValueError("Resolution must be one of 10, 30, or 60 meters.")
     bbox_buff = bbox_proj = bbox
     crs_proj = 4326
     if to_5070:
@@ -177,13 +184,9 @@ def get_3dep(
         buff_size = 20
         bbox_proj, bbox_buff = _bbox_buffer(bbox, buff_size * resolution, crs_proj)
 
-    tiff_list = s3dep.get_dem(bbox_buff, "cache", resolution)
-    if len(tiff_list) > 1:
-        dem = rxr_merge.merge_arrays(
-            [rxr.open_rasterio(f).squeeze(drop=True) for f in tiff_list]  # pyright: ignore[reportArgumentType]
-        )
-    else:
-        dem = rxr.open_rasterio(tiff_list[0]).squeeze(drop=True).rio.clip_box(*bbox_buff)
+    dem = cast("xr.DataArray", rxr.open_rasterio(url[resolution]).squeeze(drop=True))
+    dem = dem.rio.clip_box(*bbox_buff)
+    dem = dem.where(dem > dem.rio.nodata, drop=False).rio.write_nodata(np.nan)
     if to_5070:
         dem = dem.rio.reproject(crs_proj).rio.clip_box(*bbox_proj)
     dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})
