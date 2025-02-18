@@ -15,14 +15,6 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.2.9] - 2025-02-18
 
-### Added
-
-- Add `seamless-3dep` as a new optional dependency for the `dem_utils.get_3dep`
-    function. This improves the performance of downloading and storing DEM data as
-    `seamless-3dep` uses asynchronous requests and writing to disk. It also caches the
-    downloaded data to avoid downloading the same data multiple times. The cached data
-    are stored in `./cache` directory in the current working.
-
 ### Fixed
 
 - In `whitebox_tools` function when `files_to_save` is not provided, before moving the
