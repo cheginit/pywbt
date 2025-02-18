@@ -43,11 +43,9 @@ optional-dependencies.cli = [
 ]
 optional-dependencies.dem = [
   "geopandas>=1",
-  "shapely<2.0.7",
   "planetary-computer",
   "pystac-client",
   "rioxarray",
-  "tiny-retriever>=0.1.2",
 ]
 optional-dependencies.dev = [
   "folium",
@@ -60,7 +58,6 @@ optional-dependencies.dev = [
   "pystac-client",
   "pytest",
   "rioxarray",
-  "tiny-retriever>=0.1.2",
   "tomli>=1.1; python_version<'3.11'",
 ]
 optional-dependencies.docs = [

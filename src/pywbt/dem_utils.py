@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import hashlib
 import math
 from collections.abc import Iterable
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal, cast
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     import geopandas as gpd
     import xarray as xr
 
@@ -106,33 +106,26 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
         import pystac_client
         import rioxarray as rxr
         import rioxarray.merge as rxr_merge
-        from tiny_retriever import download
     except ImportError as e:
         raise DependencyError from e
 
     _check_bbox(bbox)
     bbox_buff = bbox_utm = bbox
     utm = 4326
-    dem_res = 30
     if to_utm:
         utm = _estimate_utm(bbox)
-        buff_size = 20
+        buff_size, dem_res = 20, 30
         bbox_utm, bbox_buff = _bbox_buffer(bbox, buff_size * dem_res, utm)
     catalog = pystac_client.Client.open(
         "https://planetarycomputer.microsoft.com/api/stac/v1",
         modifier=planetary_computer.sign_inplace,
     )
-    urls = [
-        str(planetary_computer.sign(item.assets["elevation"]).href)
+    signed_asset = (
+        planetary_computer.sign(item.assets["elevation"]).href
         for item in catalog.search(collections=["nasadem"], bbox=bbox_buff).items()
-    ]
-    Path("cache").mkdir(exist_ok=True)
-    tiff_list = [
-        Path("cache") / f"nasadem_{hashlib.sha256(href.encode()).hexdigest()}.tiff" for href in urls
-    ]
-    download(urls, tiff_list, timeout=600)
+    )
     dem = rxr_merge.merge_arrays(
-        [rxr.open_rasterio(f).squeeze(drop=True) for f in tiff_list]  # pyright: ignore[reportArgumentType]
+        [rxr.open_rasterio(href).squeeze(drop=True) for href in signed_asset]  # pyright: ignore[reportArgumentType]
     )
     if to_utm:
         dem = dem.rio.reproject(utm).fillna(dem.rio.nodata)
@@ -144,7 +137,7 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
 
 
 def get_3dep(
-    bbox: tuple[float, float, float, float],
+    bbox: Bbox,
     tif_path: str | Path,
     resolution: Literal[10, 30, 60] = 10,
     to_5070: bool = False,
@@ -169,6 +162,7 @@ def get_3dep(
     except ImportError as e:
         raise DependencyError from e
 
+    _check_bbox(bbox)
     base_url = "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation"
     url = {
         10: f"{base_url}/13/TIFF/USGS_Seamless_DEM_13.vrt",
