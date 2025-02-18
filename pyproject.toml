@@ -43,6 +43,7 @@ optional-dependencies.cli = [
 ]
 optional-dependencies.dem = [
   "geopandas>=1",
+  "shapely<2.0.7",
   "planetary-computer",
   "pystac-client",
   "rioxarray",
