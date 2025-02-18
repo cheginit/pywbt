@@ -63,6 +63,14 @@ def test_same_src_dir(temp_dir: str, wbt_zipfile: str, wbt_args: dict[str, list[
         zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
     assert_results(Path(temp_dir) / "streams.tif", 0.1243)
+    pywbt.whitebox_tools(
+        temp_dir,
+        wbt_args,
+        save_dir=temp_dir,
+        wbt_root=Path(temp_dir) / "WBT",
+        zip_path=Path("tests/wbt_zip") / wbt_zipfile,
+    )
+    assert_results(Path(temp_dir) / "streams.tif", 0.1243)
 
 
 def test_no_save(temp_dir: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
