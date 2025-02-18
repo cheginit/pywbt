@@ -106,7 +106,7 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
         import pystac_client
         import rioxarray as rxr
         import rioxarray.merge as rxr_merge
-        from seamless_3dep._https_download import stream_write
+        from tiny_retriever import download
     except ImportError as e:
         raise DependencyError from e
 
@@ -130,7 +130,7 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
     tiff_list = [
         Path("cache") / f"nasadem_{hashlib.sha256(href.encode()).hexdigest()}.tiff" for href in urls
     ]
-    stream_write(urls, tiff_list)
+    download(urls, tiff_list, timeout=600)
     dem = rxr_merge.merge_arrays(
         [rxr.open_rasterio(f).squeeze(drop=True) for f in tiff_list]  # pyright: ignore[reportArgumentType]
     )
