@@ -46,7 +46,7 @@ optional-dependencies.dem = [
   "planetary-computer",
   "pystac-client",
   "rioxarray",
-  "seamless-3dep>=0.3.1",
+  "tiny-retriever>=0.1.2",
 ]
 optional-dependencies.dev = [
   "folium",
@@ -59,7 +59,7 @@ optional-dependencies.dev = [
   "pystac-client",
   "pytest",
   "rioxarray",
-  "seamless-3dep>=0.3",
+  "tiny-retriever>=0.1.2",
   "tomli>=1.1; python_version<'3.11'",
 ]
 optional-dependencies.docs = [
