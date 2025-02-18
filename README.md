@@ -112,7 +112,7 @@ pip install pywbt[dem]
 Or using `micromamba`:
 
 ```bash
-micromamba install -c conda-forge pywbt 'geopandas-base>=1' planetary-computer pystac-client rioxarray
+micromamba install -c conda-forge pywbt geopandas seamless-3dep planetary-computer pystac-client rioxarray
 ```
 
 ## Example Workflow

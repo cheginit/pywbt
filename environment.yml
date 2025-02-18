@@ -4,12 +4,11 @@ channels:
 - nodefaults
 dependencies:
 - python >=3.11
-
 - pywbt >=0.2.4
 
 # Deps for examples
 - folium
-- geopandas-base >=1
+- geopandas >=1
 - ipykernel
 - ipywidgets
 - mapclassify
@@ -17,3 +16,4 @@ dependencies:
 - planetary-computer
 - pystac-client
 - rioxarray
+- seamless-3dep

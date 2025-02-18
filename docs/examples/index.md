@@ -5,7 +5,7 @@ dependencies. You can install all the dependencies using `micromamba` (or `conda
 `mamba`):
 
 ```bash
-micormamba create -n wbt pywbt folium geopandas-base>=1 ipykernel ipywidgets mapclassify matplotlib-base planetary-computer pyogrio pystac-client rasterio rioxarray shapely>=2
+micormamba create -n wbt pywbt folium geopandas ipykernel ipywidgets mapclassify matplotlib-base planetary-computer seamless-3dep pystac-client rioxarray shapely>=2
 ```
 
 This will create a new environment called `wbt` with all the required packages. You can
@@ -22,7 +22,7 @@ Alternatively, though not recommended, you can install the dependencies using `p
 ```bash
 python -m venv ./venv
 source ./venv/bin/activate
-pip install pywbt folium geopandas ipykernel ipywidgets mapclassify matplotlib planetary-computer pyogrio pystac rasterio rioxarray shapely
+pip install pywbt folium geopandas ipykernel ipywidgets mapclassify matplotlib planetary-computer pyogrio seamless-3dep pystac rasterio rioxarray shapely
 ```
 
 If you use the `pip` method, you need to install `gdal` for your operating system,
