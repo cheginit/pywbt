@@ -15,6 +15,19 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.2.9] - 2025-02-18
 
+### Added
+
+- For `dem_utils.get_3dep` use `seamless-3dep` package to support any resolution not
+    only 10, 30, and 60 meters. This Python library is more performant and caches
+    downloaded intermediate files to avoid downloading the same files multiple times.
+    This change requires adding optional `seamless-3dep` as a new dependency for the
+    `dem_utils` module.
+- For `dem_utils.get_nasadem` use `tiny-retriever` package for a more performant and
+    reliable way to download the NASADEM data. Similarly, it caches downloaded
+    intermediate files to avoid downloading the same files multiple times. This change
+    requires adding `tiny-retriever` as a optional new dependency for the `dem_utils`
+    module.
+
 ### Fixed
 
 - In `whitebox_tools` function when `files_to_save` is not provided, before moving the
