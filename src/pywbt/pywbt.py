@@ -172,6 +172,7 @@ def prepare_wbt(
         Version of WhiteboxTools.
     """
     wbt_root = Path(wbt_root)
+    wbt_root.mkdir(parents=True, exist_ok=True)
     lock_path = wbt_root / ".wbt_lock"
 
     # Acquire lock to allow only one process to prepare WhiteboxTools
