@@ -79,7 +79,7 @@ def _extract_wbt(zip_path: Path, wbt_root: Path, temp_path: Path, system: System
     except zipfile.BadZipFile as e:
         raise RuntimeError("Downloaded file is not a valid zip file.") from e
     except FileNotFoundError as e:
-        raise RuntimeError(f"Error extracting WhiteboxTools ({wbt_dir}): {e}") from e
+        raise RuntimeError(f"Error extracting WhiteboxTools: {e}") from e
     except shutil.Error as e:
         raise RuntimeError(f"Error copying WhiteboxTools files: {e}") from e
 
