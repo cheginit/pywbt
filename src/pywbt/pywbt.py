@@ -68,7 +68,7 @@ def _extract_wbt(zip_path: Path, wbt_root: Path, temp_path: Path, system: System
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(path=temp_path)
 
-        wbt_dir = next(temp_path.glob("**/WBT"), None)
+        wbt_dir = next(temp_path.glob("WhiteboxTools*/WBT"), None)
         shutil.copytree(str(wbt_dir), wbt_root, dirs_exist_ok=True)
 
         if system != "Windows":
@@ -79,7 +79,7 @@ def _extract_wbt(zip_path: Path, wbt_root: Path, temp_path: Path, system: System
     except zipfile.BadZipFile as e:
         raise RuntimeError("Downloaded file is not a valid zip file.") from e
     except FileNotFoundError as e:
-        raise RuntimeError(f"Error extracting WhiteboxTools: {e}") from e
+        raise RuntimeError(f"Error extracting WhiteboxTools ({wbt_dir}): {e}") from e
     except shutil.Error as e:
         raise RuntimeError(f"Error copying WhiteboxTools files: {e}") from e
 

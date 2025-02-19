@@ -219,7 +219,7 @@ def valid_toml_file(tmp_path: str, wbt_zipfile: str) -> Path:
     src_dir = "tests/temp_dir_cli"
     save_dir = "tests/temp_dir_cli"
     wbt_root = "tests/temp_dir_cli/WBT"
-    zip_path = "{zip_path}"
+    zip_path = "{zip_path.as_posix()}"
     compress_rasters = false
     refresh_download = false
     max_procs = -1

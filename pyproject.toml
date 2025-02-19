@@ -230,6 +230,7 @@ addopts = [
   "--cov-report=xml",
   "--junitxml=junit.xml",
   "--durations=5",
+  "--exitfirst",
 ]
 filterwarnings = [
   "ignore:.*Support for class-based:DeprecationWarning",
