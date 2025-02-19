@@ -162,7 +162,7 @@ def test_tif_to_gdf(temp_dir: str, wbt_zipfile: str) -> None:
         ["basins.tif"],
         save_dir=temp_dir,
         wbt_root=Path(temp_dir) / "WBT",
-        zip_path=Path(temp_dir) / wbt_zipfile,
+        zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
     basin_geo = pywbt.dem_utils.tif_to_gdf(Path(temp_dir) / "basins.tif", "int32", "basin")
     assert basin_geo.area.idxmax() == 175
@@ -183,7 +183,7 @@ def test_shp_out(temp_dir: str, wbt_zipfile: str) -> None:
         ["streams.shp"],
         save_dir=temp_dir,
         wbt_root=Path(temp_dir) / "WBT",
-        zip_path=Path(temp_dir) / wbt_zipfile,
+        zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
     assert Path(temp_dir, "streams.shp").stat().st_size == 179412
 
