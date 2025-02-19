@@ -213,8 +213,27 @@ def test_dem_nasadem(temp_dir: str) -> None:
 
 
 @pytest.fixture
-def valid_toml_file() -> Path:
-    return Path("tests/config.toml")
+def valid_toml_file(tmp_path: str, wbt_zipfile: str) -> Path:
+    zip_path = Path("tests/wbt_zip") / wbt_zipfile
+    content = f"""
+    src_dir = "tests/temp_dir_cli"
+    save_dir = "tests/temp_dir_cli"
+    wbt_root = "tests/temp_dir_cli/WBT"
+    zip_path = "{zip_path}"
+    compress_rasters = false
+    refresh_download = false
+    max_procs = -1
+    verbose = false
+    files_to_save = ["dem_corr.tif", "fdir.tif", "d8accum.tif"]
+
+    [arg_dict]
+    BreachDepressions = ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"]
+    D8Pointer = ["-i=dem_corr.tif", "-o=fdir.tif"]
+    D8FlowAccumulation = ["-i=fdir.tif", "--pntr", "-o=d8accum.tif"]
+    """
+    toml_file = Path(tmp_path) / "config.toml"
+    toml_file.write_text(content)
+    return toml_file
 
 
 @pytest.fixture
