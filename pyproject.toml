@@ -14,7 +14,7 @@ license = { text = "MIT" }
 authors = [
   { name = "Taher Chegini", email = "cheginit@gmail.com" },
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
@@ -22,7 +22,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -105,43 +104,77 @@ exclude = [
 ]
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 100
 
-exclude = [ ".pixi", "__pycache__" ]
+exclude = [
+  ".nox",
+  "__pycache__",
+]
 
 lint.select = [
+  # flake8-bugbear
   "B",
+  # flake8-comprehensions
   "C4",
+  # pydocstyle
   "D",
+  # Error
   "E",
+  # pyflakes
   "F",
+  # refurb
+  "FURB",
+  # isort
   "I",
+  # flake8-gettext
   "INT",
+  # flake8-implicit-str-concat
   "ISC",
+  # pep8-naming
   "N",
+  # compatibility with numpy 2.0
   "NPY201",
+  # Perflint
   "PERF",
+  # pygrep-hooks
   "PGH",
+  # misc lints
   "PIE",
+  # pylint
   "PLC",
   "PLE",
   "PLR",
   "PLW",
+  # flake8-pytest-style
   "PT",
+  # flake8-use-pathlib
   "PTH",
+  # flake8-pyi
   "PYI",
+  # flake8-quotes
   "Q",
+  # Ruff-specific rules
   "RUF",
+  # bandit
   "S",
+  # flake8-simplify
   "SIM",
+  # flake8-debugger
   "T10",
+  # flake8-print
   "T20",
+  # type-checking imports
   "TC",
+  # tidy imports
   "TID",
+  # tryceratops
   "TRY",
+  # pyupgrade
   "UP",
+  # Warning
   "W",
+  # flake8-2020
   "YTT",
 ]
 
@@ -149,16 +182,43 @@ lint.ignore = [
   "D103",
   "D105",
   "E501",
+  # conflict with ruff-formatter
   "ISC001",
+  # specific type error ignored
+  "PGH003",
+  # import at top
+  "PLC0415",
+  # too many branches
+  "PLR0912",
   "PLR0913",
+  # too many statements
+  "PLR0915",
   "PLR2004",
+  # use of pickle
+  "S301",
+  # url schema
   "S310",
   "S603",
+  # shell command
   "S605",
   "S607",
+  # custom exception
   "TRY003",
 ]
-
+lint.per-file-ignores."docs/examples/*.ipynb" = [
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D106",
+  "D107",
+  # specific type error ignored
+  "PGH003",
+  # use of "assert"
+  "S101",
+]
 lint.per-file-ignores."tests/*.py" = [
   "D100",
   "D101",
@@ -168,11 +228,19 @@ lint.per-file-ignores."tests/*.py" = [
   "D105",
   "D106",
   "D107",
+  # specific type error ignored
   "PGH003",
+  # use of "assert"
   "S101",
 ]
 lint.extend-safe-fixes = [
-  "TC004",
+  # module level imports
+  "E402",
+  # break down assert
+  "PT018",
+  # Move imports
+  "TC",
+  # absolute imports
   "TID252",
 ]
 lint.isort.known-first-party = [ "pywbt" ]
@@ -258,17 +326,15 @@ libgdal-core = "*"
 [tool.pixi.feature.test.dependencies]
 libgdal-core = "*"
 
-[tool.pixi.feature.py39.dependencies]
-python = "~=3.9.0"
-uv = "*"
+[tool.pixi.feature.py310.dependencies]
+python = "~=3.10.0"
 
 [tool.pixi.feature.py313.dependencies]
 python = "~=3.13.0"
-uv = "*"
 
 [tool.pixi.environments]
 dev = { features = [ "dev", "py313" ] }
-test39 = { features = [ "test", "dem", "cli", "py39" ] }
+test310 = { features = [ "test", "dem", "cli", "py310" ] }
 test313 = { features = [ "test", "dem", "cli", "py313" ] }
 typecheck = { features = [ "typecheck", "dem", "cli", "py313" ] }
 lint = { features = [ "lint", "py313" ], no-default-feature = true }
