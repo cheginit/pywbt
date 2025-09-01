@@ -25,9 +25,9 @@ You can try PyWBT directly in your browser by clicking the Binder badge above.
 - Seamless integration with WBT for custom geospatial workflows.
 - Minimal dependencies for ease of installation.
 - Optional `dem_utils` module for obtaining and preprocessing DEM data from
-    [3DEP](https://www.usgs.gov/3d-elevation-program) (US only at any resolutions) and
-    [NASADEM](https://planetarycomputer.microsoft.com/dataset/nasadem) (global coverage
-    at 30 m resolution).
+  [3DEP](https://www.usgs.gov/3d-elevation-program) (US only at any resolutions) and
+  [NASADEM](https://planetarycomputer.microsoft.com/dataset/nasadem) (global coverage at
+  30 m resolution).
 
 ## Installation
 
