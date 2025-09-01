@@ -148,6 +148,7 @@ def prepare_wbt(
     zip_path: str | Path | None = None,
     refresh_download: bool = False,
     max_attempts: int = 3,
+    verbose: bool = False,
 ) -> str:
     """Download the WhiteboxTools executable for the current platform.
 
@@ -165,12 +166,15 @@ def prepare_wbt(
         Defaults to ``False``.
     max_attempts : int, optional
         Maximum number of attempts to prepare WhiteboxTools, defaults to 3.
+    verbose : bool, optional
+        Whether to enable verbose logging, defaults to ``False``.
 
     Returns
     -------
     str
         Version of WhiteboxTools.
     """
+    logger.setLevel(logging.INFO if verbose else logging.WARNING)
     wbt_root = Path(wbt_root)
     wbt_root.mkdir(parents=True, exist_ok=True)
     lock_path = wbt_root / ".wbt_lock"
@@ -432,14 +436,14 @@ def whitebox_tools(
     save_dir = Path(save_dir) if save_dir else Path.cwd()
     save_dir.mkdir(parents=True, exist_ok=True)
 
-    version = prepare_wbt(wbt_root, zip_path, refresh_download)
+    version = prepare_wbt(wbt_root, zip_path, refresh_download, verbose=verbose)
 
     if not isinstance(arg_dict, dict) or not all(
-        isinstance(k, str) and isinstance(v, (list, tuple)) for k, v in arg_dict.items()
+        isinstance(k, str) and isinstance(v, list | tuple) for k, v in arg_dict.items()
     ):
         raise ValueError("arg_dict must be a dict of str keys and list or tuple values.")
 
-    if not (files_to_save is None or isinstance(files_to_save, (list, tuple))):
+    if not (files_to_save is None or isinstance(files_to_save, list | tuple)):
         raise TypeError("files_to_save must be None, a list, or tuple of strings.")
 
     with _WBTSession(Path(src_dir), Path(save_dir), files_to_save, version) as wbt:
@@ -450,8 +454,7 @@ def _run_wbt_cmd(
     cmd: str, wbt_root: str | Path = "WBT", zip_path: str | Path | None = None
 ) -> CompletedProcess[str]:
     """Run WhiteboxTools command to list available tools and their options."""
-    logger.setLevel(logging.WARNING)
-    _ = prepare_wbt(wbt_root, zip_path, False)
+    _ = prepare_wbt(wbt_root, zip_path)
     _, _, exe_name = _get_platform_suffix()
     exe_path = Path(wbt_root) / exe_name
     return subprocess.run([str(exe_path), cmd], capture_output=True, text=True, check=True)
@@ -464,7 +467,7 @@ def list_tools(wbt_root: str | Path = "WBT", zip_path: str | Path | None = None)
     ----------
     wbt_root : str or Path, optional
         Path to the directory containing the WhiteboxTools executables
-        (default is ``"WBT"``).
+        (default is ``WBT``).
     zip_path : str or Path, optional
         Path to the zip file containing the WhiteboxTools executables (default is ``None``).
 
