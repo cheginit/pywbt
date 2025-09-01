@@ -135,6 +135,8 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
     dem = dem.rio.clip_box(*bbox_utm)
     dem.attrs.update({"units": "meters", "vertical_datum": "EGM96"})
     dem.name = "elevation"
+    tif_path = Path(tif_path)
+    tif_path.parent.mkdir(parents=True, exist_ok=True)
     dem.astype("int16").rio.to_raster(tif_path)
     dem.close()
 
@@ -184,6 +186,8 @@ def get_3dep(
         dem = dem.rio.reproject(crs_proj).rio.clip_box(*bbox_proj)
     dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})
     dem.name = "elevation"
+    tif_path = Path(tif_path)
+    tif_path.parent.mkdir(parents=True, exist_ok=True)
     dem.rio.to_raster(tif_path)
     dem.close()
 
