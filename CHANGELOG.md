@@ -13,7 +13,15 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- Drop support for Python 3.9 since it has reached it's end of life.
+## [0.3.0] - 2025-09-01
+
+### Added
+
+- Add ``verbose=False`` as a new argument to `prepare_wbt`.
+
+### Changed
+
+- Drop support for Python 3.9 since it has reached its end of life.
 
 ## [0.2.9] - 2025-02-18
 
