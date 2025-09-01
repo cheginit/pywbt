@@ -137,6 +137,8 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
     dem.name = "elevation"
     tif_path = Path(tif_path)
     tif_path.parent.mkdir(parents=True, exist_ok=True)
+    if tif_path.exists():
+        tif_path.unlink()
     dem.astype("int16").rio.to_raster(tif_path)
     dem.close()
 
@@ -188,6 +190,8 @@ def get_3dep(
     dem.name = "elevation"
     tif_path = Path(tif_path)
     tif_path.parent.mkdir(parents=True, exist_ok=True)
+    if tif_path.exists():
+        tif_path.unlink()
     dem.rio.to_raster(tif_path)
     dem.close()
 
