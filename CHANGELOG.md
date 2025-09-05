@@ -13,11 +13,18 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-## [0.3.0] - 2025-09-01
+## [0.3.0] - 2025-09-05
 
 ### Added
 
-- Add ``verbose=False`` as a new argument to `prepare_wbt`.
+- Add `verbose=False` as a new argument to `prepare_wbt`.
+
+### Fixed
+
+- More robust handling of overwriting files on Windows for the two
+  DEM retrieval functions. Previously, in some edge cases, the file
+  handles were not released in time, causing permission errors when
+  trying to overwrite existing files.
 
 ### Changed
 
