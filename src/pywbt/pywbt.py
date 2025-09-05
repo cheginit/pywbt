@@ -31,18 +31,20 @@ if TYPE_CHECKING:
     ExeName = Literal["whitebox_tools.exe", "whitebox_tools"]
 
 
-def _setup_logger() -> logging.Logger:
+def _setup_logger(verbose: bool = True) -> logging.Logger:
     logger = logging.getLogger("pywbt")
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter("%(message)s")
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
-    logger.propagate = False
+    if not logger.handlers:
+        if verbose:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter("%(message)s")
+            handler.setFormatter(formatter)
+            logger.addHandler(handler)
+            logger.setLevel(logging.INFO)
+        else:
+            logger.addHandler(logging.NullHandler())
+            logger.setLevel(logging.CRITICAL + 1)
+        logger.propagate = False
     return logger
-
-
-logger = _setup_logger()
 
 
 @lru_cache(maxsize=1)
@@ -62,8 +64,11 @@ def _get_platform_suffix() -> tuple[System, Platform, ExeName]:
     return system, suffix, exe_name
 
 
-def _extract_wbt(zip_path: Path, wbt_root: Path, temp_path: Path, system: System) -> None:
+def _extract_wbt(
+    zip_path: Path, wbt_root: Path, temp_path: Path, system: System, verbose: bool
+) -> None:
     """Extract WhiteboxTools from zip file."""
+    logger = _setup_logger(verbose)
     try:
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(path=temp_path)
@@ -98,11 +103,10 @@ def _get_wbt_version(exe_path: str | Path) -> str:
 
 
 def _attempt_prepare_wbt(
-    wbt_root: Path,
-    zip_path: str | Path | None,
-    refresh_download: bool,
+    wbt_root: Path, zip_path: str | Path | None, refresh_download: bool, verbose: bool
 ) -> str | None:
     """Attempt to prepare WhiteboxTools once and return version or ``None`` if fails."""
+    logger = _setup_logger(verbose)
     system, platform_suffix, exe_name = _get_platform_suffix()
     url = BASE_URL.format(system, platform_suffix)
 
@@ -134,7 +138,7 @@ def _attempt_prepare_wbt(
                 return None
 
         try:
-            _extract_wbt(zip_path_local, wbt_root, temp_path, system)
+            _extract_wbt(zip_path_local, wbt_root, temp_path, system, verbose)
             return _get_wbt_version(exe_path)
         except RuntimeError as e:
             logger.warning(f"Extraction failed: {e}")
@@ -174,7 +178,7 @@ def prepare_wbt(
     str
         Version of WhiteboxTools.
     """
-    logger.setLevel(logging.INFO if verbose else logging.WARNING)
+    logger = _setup_logger(verbose)
     wbt_root = Path(wbt_root)
     wbt_root.mkdir(parents=True, exist_ok=True)
     lock_path = wbt_root / ".wbt_lock"
@@ -182,7 +186,7 @@ def prepare_wbt(
     # Acquire lock to allow only one process to prepare WhiteboxTools
     with SoftFileLock(lock_path):
         for attempt in range(max_attempts):
-            version = _attempt_prepare_wbt(wbt_root, zip_path, refresh_download)
+            version = _attempt_prepare_wbt(wbt_root, zip_path, refresh_download, verbose)
             if version:
                 return version
             logger.warning(f"Attempt {attempt + 1}/{max_attempts} failed, retrying...")
@@ -198,8 +202,10 @@ def _run_wbt(
     compress_rasters: bool,
     work_dir: str | Path,
     version: str,
+    verbose: bool,
 ) -> None:
     """Run a WhiteboxTools command."""
+    logger = _setup_logger(verbose)
     if tool_name in ("BreachDepressionsLeastCost", "breach_depressions_least_cost"):
         logger.warning("Forcing BreachDepressionsLeastCost to use a single process.")
         msg = " ".join(
@@ -236,6 +242,15 @@ def _run_wbt(
         logger.exception(e.stderr)
         logger.exception("Error running WhiteboxTools")
         raise RuntimeError(e.stderr) from e
+    finally:
+        # Ensure process is fully cleaned up on Windows
+        import gc
+
+        gc.collect()
+        if platform.system() == "Windows":
+            import time
+
+            time.sleep(0.1)
 
 
 class _WBTSession:
@@ -257,6 +272,7 @@ class _WBTSession:
         save_dir: Path,
         files_to_save: list[str] | tuple[str, ...] | None,
         version: str,
+        verbose: bool,
     ) -> None:
         self.src_dir = src_dir
         self.files_to_save = files_to_save
@@ -270,6 +286,8 @@ class _WBTSession:
 
         self.save_dir = save_dir
         self.version = version
+        self.verbose = verbose
+        self.logger = _setup_logger(verbose)
         self.outputs = {}
         self.system, *_ = _get_platform_suffix()
 
@@ -312,7 +330,14 @@ class _WBTSession:
         self.outputs = self._extract_outputs(wbt_args)
         for tool_name, args in wbt_args.items():
             _run_wbt(
-                exe_path, tool_name, args, max_procs, compress_rasters, self.src_dir, self.version
+                exe_path,
+                tool_name,
+                args,
+                max_procs,
+                compress_rasters,
+                self.src_dir,
+                self.version,
+                self.verbose,
             )
 
     def _cleanup(self) -> None:
@@ -323,14 +348,14 @@ class _WBTSession:
                 for file in self.files_to_save:
                     source = self.src_dir / file
                     if not source.exists():
-                        logger.exception(f"Output file to save {source} not found")
+                        self.logger.exception(f"Output file to save {source} not found")
                         raise FileNotFoundError(f"Output file to save {source} not found")
                     destination = Path(self.save_dir, file)
                     destination.unlink(missing_ok=True)
                     shutil.move(source, destination)
-                    logger.info(f"Moved output file {source} to {destination}")
+                    self.logger.info(f"Moved output file {source} to {destination}")
                 _ = [(self.src_dir / f).unlink(missing_ok=True) for f in self.outputs]
-                logger.info("Deleted remaining intermediate files.")
+                self.logger.info("Deleted remaining intermediate files.")
             else:
                 for file in self.outputs:
                     out_file = Path(self.save_dir, file)
@@ -340,10 +365,10 @@ class _WBTSession:
             for file in self.outputs:
                 if file not in self.files_to_save:
                     Path(self.src_dir / file).unlink()
-                    logger.info(f"Deleted intermediate file {file}")
+                    self.logger.info(f"Deleted intermediate file {file}")
 
     def __enter__(self) -> _WBTSession:  # noqa: PYI034
-        logger.info(
+        self.logger.info(
             f"Starting WhiteboxTools session with source directory: {self.src_dir.absolute()}"
         )
         return self
@@ -355,11 +380,11 @@ class _WBTSession:
         if exc_type is not None:
             for file in self.outputs:
                 Path(self.src_dir / file).unlink(missing_ok=True)
-            logger.info("Deleted all intermediate files.")
-            logger.exception(f"An error occurred: {exc_value}")
+            self.logger.info("Deleted all intermediate files.")
+            self.logger.exception(f"An error occurred: {exc_value}")
             return False
         self._cleanup()
-        logger.info(
+        self.logger.info(
             f"Completed WhiteboxTools session with source directory: {self.src_dir.absolute()}"
         )
         return True
@@ -430,8 +455,6 @@ def whitebox_tools(
     Exception
         For any other unexpected errors.
     """
-    logger.setLevel(logging.INFO if verbose else logging.WARNING)
-
     wbt_root = Path(wbt_root)
     save_dir = Path(save_dir) if save_dir else Path.cwd()
     save_dir.mkdir(parents=True, exist_ok=True)
@@ -446,7 +469,7 @@ def whitebox_tools(
     if not (files_to_save is None or isinstance(files_to_save, list | tuple)):
         raise TypeError("files_to_save must be None, a list, or tuple of strings.")
 
-    with _WBTSession(Path(src_dir), Path(save_dir), files_to_save, version) as wbt:
+    with _WBTSession(Path(src_dir), Path(save_dir), files_to_save, version, verbose) as wbt:
         wbt.run(arg_dict, wbt_root, compress_rasters, max_procs)
 
 
