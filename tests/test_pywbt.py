@@ -35,111 +35,111 @@ def wbt_args() -> dict[str, list[str]]:
     }
 
 
-def test_leastcost(temp_dir: str, wbt_zipfile: str) -> None:
+def test_leastcost(tmp_path: str, wbt_zipfile: str) -> None:
     wbt_args = {
         "BreachDepressionsLeastCost": ["-i=dem.tif", "--fill", "--dist=100", "-o=dem_corr.tif"],
         "D8FlowAccumulation": ["-i=dem_corr.tif", "-o=d8accum.tif"],
         "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
     }
-    shutil.copy("tests/dem.tif", temp_dir)
+    shutil.copy("tests/dem.tif", tmp_path)
     pywbt.whitebox_tools(
-        temp_dir,
+        tmp_path,
         wbt_args,
-        save_dir=temp_dir,
-        wbt_root=Path(temp_dir) / "WBT",
+        save_dir=tmp_path,
+        wbt_root=Path(tmp_path) / "WBT",
         zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
-    assert_results(Path(temp_dir) / "streams.tif", 0.1149)
+    assert_results(Path(tmp_path) / "streams.tif", 0.1149)
 
 
-def test_same_src_dir(temp_dir: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
-    shutil.copy("tests/dem.tif", temp_dir)
+def test_same_src_dir(tmp_path: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
+    shutil.copy("tests/dem.tif", tmp_path)
     pywbt.whitebox_tools(
-        temp_dir,
+        tmp_path,
         wbt_args,
         ["streams.tif"],
-        save_dir=temp_dir,
-        wbt_root=Path(temp_dir) / "WBT",
+        save_dir=tmp_path,
+        wbt_root=Path(tmp_path) / "WBT",
         zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
-    assert_results(Path(temp_dir) / "streams.tif", 0.1243)
+    assert_results(Path(tmp_path) / "streams.tif", 0.1243)
     pywbt.whitebox_tools(
-        temp_dir,
+        tmp_path,
         wbt_args,
-        save_dir=temp_dir,
-        wbt_root=Path(temp_dir) / "WBT",
+        save_dir=tmp_path,
+        wbt_root=Path(tmp_path) / "WBT",
         zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
-    assert_results(Path(temp_dir) / "streams.tif", 0.1243)
+    assert_results(Path(tmp_path) / "streams.tif", 0.1243)
 
 
-def test_no_save(temp_dir: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
-    shutil.copy("tests/dem.tif", temp_dir)
-    results_dir = Path(temp_dir) / "results"
+def test_no_save(tmp_path: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
+    shutil.copy("tests/dem.tif", tmp_path)
+    results_dir = Path(tmp_path) / "results"
     pywbt.whitebox_tools(
-        temp_dir,
+        tmp_path,
         wbt_args,
         save_dir=results_dir,
-        wbt_root=Path(temp_dir) / "WBT",
+        wbt_root=Path(tmp_path) / "WBT",
         zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
     assert_results(results_dir / "streams.tif", 0.1243)
 
 
-def test_with_save(temp_dir: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
-    shutil.copy("tests/dem.tif", temp_dir)
-    results_dir = Path(temp_dir) / "results"
+def test_with_save(tmp_path: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
+    shutil.copy("tests/dem.tif", tmp_path)
+    results_dir = Path(tmp_path) / "results"
     pywbt.whitebox_tools(
-        temp_dir,
+        tmp_path,
         wbt_args,
         ["streams.tif"],
         save_dir=results_dir,
-        wbt_root=Path(temp_dir) / "WBT",
+        wbt_root=Path(tmp_path) / "WBT",
         zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
     assert_results(results_dir / "streams.tif", 0.1243)
 
 
-def test_wbt_error(temp_dir: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
+def test_wbt_error(tmp_path: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
     wbt_args["ExtractStreams"][0] = "--flow_accum="
-    shutil.copy("tests/dem.tif", temp_dir)
+    shutil.copy("tests/dem.tif", tmp_path)
     with pytest.raises(RuntimeError):
         pywbt.whitebox_tools(
-            temp_dir,
+            tmp_path,
             wbt_args,
-            save_dir=Path(temp_dir) / "results",
-            wbt_root=Path(temp_dir) / "WBT",
+            save_dir=Path(tmp_path) / "results",
+            wbt_root=Path(tmp_path) / "WBT",
             zip_path=Path("tests/wbt_zip") / wbt_zipfile,
         )
 
 
-def test_wbt_wrong_output(temp_dir: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
-    shutil.copy("tests/dem.tif", temp_dir)
+def test_wbt_wrong_output(tmp_path: str, wbt_zipfile: str, wbt_args: dict[str, list[str]]) -> None:
+    shutil.copy("tests/dem.tif", tmp_path)
     with pytest.raises(FileNotFoundError):
         pywbt.whitebox_tools(
-            temp_dir,
+            tmp_path,
             wbt_args,
             ["no_streams.tif"],
-            save_dir=Path(temp_dir) / "results",
-            wbt_root=Path(temp_dir) / "WBT",
+            save_dir=Path(tmp_path) / "results",
+            wbt_root=Path(tmp_path) / "WBT",
             zip_path=Path("tests/wbt_zip") / wbt_zipfile,
         )
 
 
 def test_wrong_platform(
-    temp_dir: str, wrong_wbt_zipfile: str, wbt_args: dict[str, list[str]]
+    tmp_path: str, wrong_wbt_zipfile: str, wbt_args: dict[str, list[str]]
 ) -> None:
-    shutil.copy("tests/dem.tif", temp_dir)
-    shutil.copy(Path("tests/wbt_zip") / wrong_wbt_zipfile, Path(temp_dir) / wrong_wbt_zipfile)
+    shutil.copy("tests/dem.tif", tmp_path)
+    shutil.copy(Path("tests/wbt_zip") / wrong_wbt_zipfile, Path(tmp_path) / wrong_wbt_zipfile)
     pywbt.whitebox_tools(
-        temp_dir,
+        tmp_path,
         wbt_args,
         ["streams.tif"],
-        save_dir=temp_dir,
-        wbt_root=Path(temp_dir) / "WBT",
-        zip_path=Path(temp_dir) / wrong_wbt_zipfile,
+        save_dir=tmp_path,
+        wbt_root=Path(tmp_path) / "WBT",
+        zip_path=Path(tmp_path) / wrong_wbt_zipfile,
     )
-    assert_results(Path(temp_dir) / "streams.tif", 0.1243)
+    assert_results(Path(tmp_path) / "streams.tif", 0.1243)
 
 
 def test_tools() -> None:
@@ -149,26 +149,26 @@ def test_tools() -> None:
         assert isinstance(pywbt.tool_parameters(t), list)
 
 
-def test_tif_to_gdf(temp_dir: str, wbt_zipfile: str) -> None:
+def test_tif_to_gdf(tmp_path: str, wbt_zipfile: str) -> None:
     wbt_args = {
         "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
         "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
         "Basins": ["--d8_pntr=fdir.tif", "-o=basins.tif"],
     }
-    shutil.copy("tests/dem.tif", temp_dir)
+    shutil.copy("tests/dem.tif", tmp_path)
     pywbt.whitebox_tools(
-        temp_dir,
+        tmp_path,
         wbt_args,
         ["basins.tif"],
-        save_dir=temp_dir,
-        wbt_root=Path(temp_dir) / "WBT",
+        save_dir=tmp_path,
+        wbt_root=Path(tmp_path) / "WBT",
         zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
-    basin_geo = pywbt.dem_utils.tif_to_gdf(Path(temp_dir) / "basins.tif", "int32", "basin")
+    basin_geo = pywbt.dem_utils.tif_to_gdf(Path(tmp_path) / "basins.tif", "int32", "basin")
     assert basin_geo.area.idxmax() == 175
 
 
-def test_shp_out(temp_dir: str, wbt_zipfile: str) -> None:
+def test_shp_out(tmp_path: str, wbt_zipfile: str) -> None:
     wbt_args = {
         "BreachDepressions": ["-i=dem.tif", "--fill_pits", "-o=dem_corr.tif"],
         "D8Pointer": ["-i=dem_corr.tif", "-o=fdir.tif"],
@@ -176,22 +176,22 @@ def test_shp_out(temp_dir: str, wbt_zipfile: str) -> None:
         "ExtractStreams": ["--flow_accum=d8accum.tif", "--threshold=600.0", "-o=streams.tif"],
         "RasterToVectorLines": ["-i=streams.tif", "-o=streams.shp"],
     }
-    shutil.copy("tests/dem.tif", temp_dir)
+    shutil.copy("tests/dem.tif", tmp_path)
     pywbt.whitebox_tools(
-        temp_dir,
+        tmp_path,
         wbt_args,
         ["streams.shp"],
-        save_dir=temp_dir,
-        wbt_root=Path(temp_dir) / "WBT",
+        save_dir=tmp_path,
+        wbt_root=Path(tmp_path) / "WBT",
         zip_path=Path("tests/wbt_zip") / wbt_zipfile,
     )
-    assert Path(temp_dir, "streams.shp").stat().st_size == 179412
+    assert Path(tmp_path, "streams.shp").stat().st_size == 179412
 
 
 @pytest.mark.xfail(is_linux, reason="pyproj seem to have issues on Linux.")
-def test_dem_3dep(temp_dir: str) -> None:
+def test_dem_3dep(tmp_path: str) -> None:
     bbox = (-95.201, 29.70, -95.20, 29.701)
-    fname_3dep = Path(temp_dir) / "3dep.tif"
+    fname_3dep = Path(tmp_path) / "3dep.tif"
     pywbt.dem_utils.get_3dep(bbox, fname_3dep, resolution=30, to_5070=True)
     d3 = pywbt.dem_utils.tif_to_da(fname_3dep)
     assert d3.shape == (5, 4)
@@ -203,9 +203,9 @@ def test_dem_3dep(temp_dir: str) -> None:
 
 
 @pytest.mark.xfail(is_linux, reason="pyproj seem to have issues on Linux.")
-def test_dem_nasadem(temp_dir: str) -> None:
+def test_dem_nasadem(tmp_path: str) -> None:
     bbox = (-95.201, 29.70, -95.20, 29.701)
-    fname_nasadem = Path(temp_dir) / "nasadem.tif"
+    fname_nasadem = Path(tmp_path) / "nasadem.tif"
     pywbt.dem_utils.get_nasadem(bbox, fname_nasadem, to_utm=True)
     dn = pywbt.dem_utils.tif_to_da(fname_nasadem, "int16", "elevation", "Elevation", -32768)
     assert dn.shape == (5, 5)
