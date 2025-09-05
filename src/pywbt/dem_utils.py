@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+import contextlib
 import math
+import platform
+import shutil
+import tempfile
+import time
 from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -86,6 +91,105 @@ def _estimate_utm(bbox: Bbox) -> int:
     return int(utm_list[0].code)
 
 
+def _save_to_raster(
+    data_array: xr.DataArray,
+    output_path: str | Path,
+) -> None:
+    """Save a DataArray to a raster file with Windows-safe file handling.
+
+    This function addresses a Windows-specific issue where rasterio/GDAL may fail
+    to overwrite existing files due to strict file locking. On Windows, file handles
+    are not always immediately released after operations, causing "Permission denied"
+    errors when attempting to delete or overwrite files. This is particularly common
+    when the same file is written multiple times in quick succession.
+
+    The function uses a temporary file approach on Windows: it writes to a temporary
+    file first, then safely replaces the target file. This avoids the direct overwrite
+    issue that causes rasterio's internal delete operation to fail.
+
+    Parameters
+    ----------
+    data_array : xr.DataArray
+        The DataArray to save to disk. Must have a valid CRS and spatial dimensions.
+    output_path : str or pathlib.Path
+        Path where the raster file should be saved.
+
+    Raises
+    ------
+    PermissionError
+        If the file cannot be overwritten after multiple attempts on Windows.
+
+    Notes
+    -----
+    On non-Windows systems, this function simply calls data_array.rio.to_raster()
+    directly. The temporary file workaround is only used on Windows when the
+    target file already exists.
+
+    Examples
+    --------
+    >>> import xarray as xr
+    >>> import numpy as np
+    >>> # Create a sample DataArray with spatial information
+    >>> da = xr.DataArray(
+    ...     np.random.rand(100, 100),
+    ...     dims=["y", "x"],
+    ...     coords={"y": np.arange(100), "x": np.arange(100)}
+    ... )
+    >>> da.rio.write_crs("EPSG:4326", inplace=True)
+    >>> _save_to_raster(da, "output.tif")
+    """
+    import gc
+    from pathlib import Path
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Check if we need to use the Windows workaround
+    if platform.system() == "Windows" and output_path.exists():
+        # Create a temporary file in the same directory to ensure same filesystem
+        with tempfile.NamedTemporaryFile(
+            mode="wb", dir=output_path.parent, suffix=output_path.suffix, delete=False
+        ) as tmp_file:
+            temp_path = Path(tmp_file.name)
+
+        try:
+            # Write to temporary file
+            data_array.rio.to_raster(temp_path)
+
+            # Attempt to replace the file with retries
+            max_attempts = 5
+            last_error = None
+
+            for attempt in range(max_attempts):
+                if attempt > 0:
+                    # Wait before retry (skip on first attempt)
+                    time.sleep(0.1 * attempt)  # Exponential backoff
+                    gc.collect()  # Force garbage collection
+
+                try:
+                    output_path.unlink()
+                    shutil.move(str(temp_path), str(output_path))
+                except PermissionError as e:
+                    last_error = e
+                    continue  # Try next attempt
+                else:
+                    return  # Success!
+
+            # All attempts failed
+            raise PermissionError(
+                f"Failed to overwrite {output_path} after {max_attempts} attempts. "
+                f"The file may be in use by another process. "
+                f"Original error: {last_error}"
+            ) from last_error
+
+        finally:
+            with contextlib.suppress(PermissionError):
+                temp_path.unlink(missing_ok=True)
+    else:
+        # Non-Windows systems or new files: use standard approach
+        data_array.rio.to_raster(output_path)
+
+
 def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
     """Get DEM for a given bounding box from NASADEM.
 
@@ -135,11 +239,7 @@ def get_nasadem(bbox: Bbox, tif_path: str | Path, to_utm: bool = False) -> None:
     dem = dem.rio.clip_box(*bbox_utm)
     dem.attrs.update({"units": "meters", "vertical_datum": "EGM96"})
     dem.name = "elevation"
-    tif_path = Path(tif_path)
-    tif_path.parent.mkdir(parents=True, exist_ok=True)
-    if tif_path.exists():
-        tif_path.unlink()
-    dem.astype("int16").rio.to_raster(tif_path)
+    _save_to_raster(dem.astype("int16"), tif_path)
     dem.close()
 
 
@@ -188,11 +288,7 @@ def get_3dep(
         dem = dem.rio.reproject(crs_proj).rio.clip_box(*bbox_proj)
     dem.attrs.update({"units": "meters", "vertical_datum": "NAVD88"})
     dem.name = "elevation"
-    tif_path = Path(tif_path)
-    tif_path.parent.mkdir(parents=True, exist_ok=True)
-    if tif_path.exists():
-        tif_path.unlink()
-    dem.rio.to_raster(tif_path)
+    _save_to_raster(dem.astype("f4"), tif_path)
     dem.close()
 
 
