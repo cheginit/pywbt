@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import contextlib
 import platform
-import shutil
-import tempfile
 
 import pytest
 
@@ -50,14 +47,6 @@ def wrong_wbt_zipfile() -> str:
     else:
         suffix = "win_amd64"
     return base_name.format(suffix)
-
-
-@pytest.fixture
-def temp_dir():
-    temp_dir = tempfile.mkdtemp(prefix="test_", dir=".")
-    yield temp_dir
-    with contextlib.suppress(PermissionError):
-        shutil.rmtree(temp_dir)
 
 
 @pytest.fixture
